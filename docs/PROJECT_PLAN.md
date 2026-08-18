@@ -95,16 +95,20 @@ flowchart TB
 | Katman | Teknoloji |
 |--------|-----------|
 | Backend | FastAPI, async SQLAlchemy 2.0, Pydantic v2 |
-| DB | PostgreSQL 16, Alembic (migration) |
-| Vektör | **Öneri: pgvector veya Qdrant** (ChromaDB yerine — bkz. 4.3) |
-| RAG | LangChain |
+| DB | PostgreSQL 16 + **pgvector** (vector store), Alembic (migration) |
+| RAG | LangChain + sentence-transformers (embedding) |
+| LLM | **Yerel (Ollama / llama.cpp)** + opsiyonel OpenAI fallback |
 | Cache/Queue | Redis, Celery |
+| Object Storage | **MinIO** (local) + **S3** (production) |
 | Frontend | React 18, TypeScript, Vite, Tailwind, shadcn/ui |
 | FE State | Zustand, TanStack Query, React Hook Form + Zod |
+| i18n | react-i18next (**TR + EN**) |
 | Ödeme | Stripe |
 | Email | Resend veya SendGrid |
 | Gözlem | Sentry, PostHog, yapılandırılmış JSON log |
 | Konteyner | Docker, docker-compose, GitHub Actions |
+
+**Not:** Kota takibi yerel LLM için de **token/maliyet** bazlı yapılacak (self-host maliyet izleme).
 
 ---
 
@@ -114,10 +118,10 @@ flowchart TB
 > Öncelik: 🔴 zorunlu · 🟡 önemli · 🟢 iyi olur.
 
 ### Altyapı & Veri
-- 🔴 **4.1 Object Storage (S3 / MinIO):** Dosyalar nerede fiziksel olarak tutulacak belirsiz. DB'ye BLOB koymak ölçeklenmez. Yerelde MinIO, production'da S3 uyumlu depolama. İmzalı URL zaten listede var, bunun altyapısı bu.
-- 🔴 **4.2 LLM Provider seçimi + soyutlama + fallback:** "AI" deniyor ama sağlayıcı (OpenAI / Anthropic / Azure OpenAI / yerel) belirtilmemiş. Bir `LLMProvider` arayüzü + birincil/yedek sağlayıcı + timeout/retry gerekir. Sağlayıcı kesintisi tüm ürünü durdurmasın.
-- 🟡 **4.3 Vector DB tercihi:** ChromaDB prototipte iyi ama production'da ölçekleme/kalıcılık/backup zayıf. Zaten Postgres olduğu için **pgvector** (operasyon basitliği) veya yük artarsa **Qdrant** öneriyorum.
-- 🔴 **4.4 AI maliyet & token takibi:** Kota "istek sayısı" değil **token/maliyet** bazlı olmalı. İşlem öncesi token tahmini + tenant bazlı aylık maliyet tavanı + aşımda durdurma. Aksi halde bir kullanıcı faturayı patlatır.
+- ✅ **4.1 Object Storage:** **MinIO (local) + S3 (production)** seçildi. Dosyalar DB'de değil object storage'da, imzalı URL ile erişim.
+- ✅ **4.2 LLM Provider:** **Yerel (Ollama / llama.cpp)** birincil, opsiyonel OpenAI fallback. `LLMProvider` arayüzü + timeout/retry stratejisi.
+- ✅ **4.3 Vector DB:** **pgvector** seçildi (operasyon basitliği, backup/restore kolaylığı).
+- ✅ **4.4 AI maliyet & token takibi:** Kota **token/maliyet** bazlı (yerel LLM için de hesaplanacak). İşlem öncesi token tahmini + tenant bazlı aylık tavan + aşımda durdurma.
 - 🟡 **4.5 RAG işleme boru hattı detayı:** Chunking stratejisi, embedding modeli, sayfa/koordinat eşleme, tekrar-eden içerik (dedup), yeniden-embed (re-index) tetikleri netleştirilmeli. Sayfa referanslı yanıt buna bağlı.
 - 🟡 **4.6 AI sonuç önbellekleme:** Aynı doküman + aynı istek için sonuç cache'lenerek maliyet düşürülür (Redis / DB).
 
@@ -132,7 +136,7 @@ flowchart TB
 - 🔴 **4.12 Test stratejisi:** Listede test yok. pytest (backend), Vitest + React Testing Library (FE), Playwright (E2E), yük testi (k6/Locust). CI'ya bağlanmalı.
 - 🟡 **4.13 Streaming yanıt (SSE/WebSocket):** Chat cevabı token token akmalı; yoksa UX zayıf olur.
 - 🟡 **4.14 Onboarding + boş durum (empty state) + landing page:** İlk kullanıcı deneyimi ve pazarlama sayfası.
-- 🟡 **4.15 i18n (TR/EN):** Arayüz çok dilli olacak mı? Baştan altyapısı kurulmalı.
+- ✅ **4.15 i18n:** **TR + EN** (react-i18next). Backend hata mesajları + email şablonları da çok dilli.
 - 🟢 **4.16 Erişilebilirlik (a11y):** shadcn temeli iyi; klavye/aria kontrolleri hedeflensin.
 - 🟢 **4.17 PWA / mobil uyum:** Responsive + opsiyonel PWA.
 
@@ -248,57 +252,21 @@ filtresi zorunlu. Bunu tek noktadan garanti etmek için repository katmanında
 
 ---
 
-## 7. Geliştirme Fazları / Yol Haritası
+## 7. Geliştirme Yol Haritası
 
-> Her faz kendi içinde çalışır bir dilim (vertical slice) üretir; sonda demo edilebilir.
+**Detaylı faz planı:** [ROADMAP.md](ROADMAP.md)
 
-### Faz 0 — Temel & İskele
-- Monorepo yapısı (`backend/`, `frontend/`, `infra/`, `docs/`)
-- Docker-compose (Postgres, Redis, MinIO, backend, frontend, worker)
-- Alembic kurulumu, temel config, `.env.example`
-- CI iskeleti (lint + test + build), pre-commit hooks
-- **Kritik ekler:** 4.19 API versiyonlama, 4.12 test iskeleti
+**Özet:**
+- **Faz 0:** Temel & İskele (Docker, CI, test, API versiyonlama)
+- **Faz 1:** Auth & Multi-tenant
+- **Faz 2:** Doküman yönetimi + işleme (MinIO, pgvector)
+- **Faz 3:** RAG chat (yerel LLM, streaming)
+- **Faz 4:** Diğer AI özellikleri (summary, quiz vb.)
+- **Faz 5:** Ödeme & kota (Stripe)
+- **Faz 6:** Dashboard, paylaşım, export
+- **Faz 7:** Sertleştirme, güvenlik, i18n (TR+EN), yayın
 
-### Faz 1 — Auth & Multi-tenant (M1, M2)
-- Kullanıcı, organizasyon, membership modelleri
-- JWT + refresh rotation, email doğrulama, şifre sıfırlama, lockout
-- Tenant scoping altyapısı, rol tabanlı yetki (RBAC)
-- 2FA (Pro'ya bağlı feature flag)
-
-### Faz 2 — Doküman Yönetimi & İşleme (M3, M4)
-- Object storage entegrasyonu (MinIO/S3) + signed URL
-- Yükleme + magic-bytes doğrulama + boyut limiti + malware scan
-- Batch upload, liste/sil/favori
-- Celery işleme: metin/OCR → chunk → embedding → vector index
-- **Kritik ekler:** 4.1, 4.5
-
-### Faz 3 — AI Çekirdeği: RAG Chat (M5 kısmi)
-- LLM provider soyutlama + fallback (4.2)
-- RAG chat, sayfa referanslı yanıt, SSE streaming (4.13)
-- Prompt injection önleme + çıktı moderasyonu (4.9)
-- Token/maliyet takibi + kota kontrolü (4.4)
-
-### Faz 4 — Diğer AI Özellikleri (M5 kalan)
-- Summary (4 seviye), Key Points, Quiz, Translation, Data Extraction, Compare
-- AI sonuç önbellekleme (4.6)
-- Prompt şablonları (M9 kısmi)
-
-### Faz 5 — Ödeme & Kota (M6)
-- Stripe planları, checkout, portal
-- Webhook + idempotency + reconciliation (4.7)
-- Tier bazlı kota zorlama
-
-### Faz 6 — Dashboard, Paylaşım, Export (M7, M8, M9)
-- Recharts dashboard, admin panel
-- Shareable links, ekip paylaşımı, history, yorum
-- Export (PDF/DOCX/XLSX/MD)
-
-### Faz 7 — Sertleştirme & Yayına Hazırlık (M10, M11, M12, M13)
-- Güvenlik denetimi, GDPR (data export / silme), audit log
-- Bildirimler (email + in-app), email domain auth (4.10)
-- Gözlemlenebilirlik (4.20), yedekleme (4.18), staging (4.21)
-- Yasal sayfalar (4.8), i18n (4.15), onboarding (4.14)
-- Yük testi, dokümantasyon, deployment guide
+**Süre:** ~12-16 hafta (tam zamanlı 1-2 geliştirici).
 
 ---
 
@@ -380,22 +348,36 @@ DocAssistant/
 
 | Risk | Etki | Azaltma |
 |------|------|---------|
-| AI maliyet patlaması | Yüksek | Token tahmini + tenant kota tavanı + cache (4.4, 4.6) |
+| AI maProje Klasör Yapısı
+
+**Detaylı yapı:** [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
+
+```
+DocAssistant/
+├── backend/      # FastAPI, SQLAlchemy, Celery, AI servisleri
+├── frontend/     # React + Vite, shadcn/ui, TanStack Query
+├── infra/        # Docker, docker-compose, K8s (opsiyonel)
+├── docs/         # PROJECT_PLAN, ROADMAP, STRUCTURE, API
+└── .github/workflows/  # CI/CDyerel LLM için bile) |
 | Tenant veri sızıntısı | Kritik | Otomatik scoping + izolasyon testleri |
-| LLM sağlayıcı kesintisi | Yüksek | Fallback provider + retry/timeout (4.2) |
+| Yerel LLM kesintisi | Orta | OpenAI fallback + retry/timeout |
 | Uzun AI işlerinde timeout | Orta | Celery + streaming + iş durumu takibi |
-| Vector store ölçekleme | Orta | pgvector/Qdrant seçimi (4.3) |
-| Stripe webhook tutarsızlığı | Yüksek | Idempotency + reconciliation (4.7) |
+| Stripe webhook tutarsızlığı | Yüksek | Idempotency + reconciliation |
+| MinIO/S3 erişim hatası | Orta | Signed URL retry + health check✅ Onaylanmış Kararlar
+
+1. **LLM sağlayıcı:** Yerel (Ollama / llama.cpp) birincil, opsiyonel OpenAI fallback
+2. **Vector DB:** pgvector (operasyon basitliği)
+3. **Object storage:** MinIO (local) + S3 (production)
+4. **i18n:** TR + EN (react-i18next)
+5. **Kota birimi:** Token/maliyet (yerel LLM için de hesaplanacak)
+
+> ✅ Kararlar alındı, Faz 0 iskelesine başlanabilir.
 
 ---
 
-## 13. Sonraki Adım (Onay Bekleyen Kararlar)
+## 14. İlgili Belgeler
 
-Kod yazımına başlamadan netleşmesi gereken seçimler:
-1. **LLM sağlayıcı** hangisi olacak? (OpenAI / Anthropic / Azure / yerel)
-2. **Vector DB:** pgvector mı Qdrant mı? (öneri: başla pgvector)
-3. **Object storage:** local MinIO + prod S3 uygun mu?
-4. **i18n:** Sadece TR mi, TR+EN mi?
-5. **Kota birimi:** İstek sayısı mı, token/maliyet mi? (öneri: token/maliyet)
-
-> Bu 5 karar verildiğinde Faz 0 iskelesini kurmaya başlayabilirim.
+- **Faz bazlı yol haritası:** [ROADMAP.md](ROADMAP.md)
+- **Detaylı klasör yapısı:** [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
+- **Mimari diyagramlar:** [ARCHITECTURE.md](ARCHITECTURE.md) *(Faz 0'da oluşturulacak)*
+- **Güvenlik politikaları:** [SECURITY.md](SECURITY.md) *(Faz 7'de oluşturulacak)*
