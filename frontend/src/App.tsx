@@ -1,33 +1,30 @@
-import { useQuery } from "@tanstack/react-query";
+import { Navigate, Route, Routes } from "react-router-dom";
 
-import { apiClient } from "./lib/api-client";
-
-function useHealth() {
-  return useQuery({
-    queryKey: ["health"],
-    queryFn: async () => {
-      const { data } = await apiClient.get<{ status: string }>("/health");
-      return data;
-    },
-  });
-}
+import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
+import DashboardPage from "@/routes/DashboardPage";
+import ForgotPasswordPage from "@/routes/ForgotPasswordPage";
+import LoginPage from "@/routes/LoginPage";
+import RegisterPage from "@/routes/RegisterPage";
+import ResetPasswordPage from "@/routes/ResetPasswordPage";
+import TeamPage from "@/routes/TeamPage";
+import VerifyEmailPage from "@/routes/VerifyEmailPage";
 
 export default function App() {
-  const { data, isLoading, isError } = useHealth();
-
-  const status = isLoading
-    ? "kontrol ediliyor…"
-    : isError
-      ? "backend'e ulaşılamadı"
-      : (data?.status ?? "bilinmiyor");
-
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8">
-      <h1 className="text-4xl font-bold">DocAssistant</h1>
-      <p className="text-neutral-400">AI destekli doküman asistanı — Faz 0 iskeleti</p>
-      <div className="rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm">
-        Backend durumu: <span className="font-mono">{status}</span>
-      </div>
-    </main>
+    <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/organizations/:orgId/team" element={<TeamPage />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 }

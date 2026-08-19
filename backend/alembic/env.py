@@ -5,11 +5,11 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlalchemy.pool import NullPool
 
 from alembic import context
+
+# Modeller import edilince metadata otomatik dolar (autogenerate için).
+from app import models  # noqa: E402,F401
 from app.core.config import settings
 from app.core.database import Base
-
-# Modeller import edildikçe metadata otomatik dolar (Faz 1+).
-# from app.models import *  # noqa
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
