@@ -26,6 +26,21 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    # Auth / JWT
+    JWT_SECRET: str = "change-me-in-production-please-32bytes-min"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    EMAIL_VERIFICATION_EXPIRE_HOURS: int = 24
+    PASSWORD_RESET_EXPIRE_HOURS: int = 1
+
+    # Account lockout
+    MAX_LOGIN_ATTEMPTS: int = 5
+    LOCKOUT_MINUTES: int = 15
+
+    # Dev: email gönderimi henüz yok (Faz 7). Local'de token'ları API yanıtında döndür.
+    EXPOSE_DEV_TOKENS: bool = True
+
     # Object storage (MinIO local / S3 prod)
     S3_ENDPOINT: str = "http://localhost:9000"
     S3_ACCESS_KEY: str = "minioadmin"

@@ -27,17 +27,17 @@
 **Hedef:** Proje temeli, tüm ekip aynı ortamda çalışabilir.
 
 ### Görevler
-- [ ] Monorepo yapısı kur (`backend/`, `frontend/`, `infra/`, `docs/`)
-- [ ] `docker-compose.yml` — Postgres, Redis, MinIO, backend, frontend, worker
-- [ ] Backend: FastAPI iskelet + async SQLAlchemy + Alembic
-- [ ] Frontend: Vite + React 18 + TypeScript + Tailwind + shadcn/ui
-- [ ] `.env.example` — tüm değişkenler açıklamalı
-- [ ] pre-commit hooks (black, ruff, prettier, eslint)
-- [ ] CI: GitHub Actions (lint + test çalıştır)
-- [ ] Test iskeleti: pytest, Vitest
-- [ ] API versiyonlama (`/api/v1/`)
-- [ ] README: kurulum, çalıştırma, katkı rehberi
-- [ ] Dokümantasyon: `docs/` klasörü yapısı
+- [X] Monorepo yapısı kur (`backend/`, `frontend/`, `infra/`, `docs/`)
+- [x] `docker-compose.yml` — Postgres, Redis, MinIO, backend, frontend, worker
+- [x] Backend: FastAPI iskelet + async SQLAlchemy + Alembic
+- [x] Frontend: Vite + React 18 + TypeScript + Tailwind + shadcn/ui
+- [x] `.env.example` — tüm değişkenler açıklamalı
+- [x] pre-commit hooks (black, ruff, prettier, eslint)
+- [x] CI: GitHub Actions (lint + test çalıştır)
+- [x] Test iskeleti: pytest, Vitest
+- [x] API versiyonlama (`/api/v1/`)
+- [x] README: kurulum, çalıştırma, katkı rehberi
+- [x] Dokümantasyon: `docs/` klasörü yapısı
 
 ### Teslim Kriteri
 ```bash
@@ -53,20 +53,20 @@ docker-compose up
 **Hedef:** Kullanıcı sistemi + organizasyon/ekip yönetimi.
 
 ### Görevler
-- [ ] Veri modeli: `User`, `Organization`, `Membership`, `Invitation`
-- [ ] Register + email doğrulama (verification token)
-- [ ] Login → JWT (access + refresh) + rotation
-- [ ] Şifre sıfırlama (reset token)
-- [ ] Password strength (zxcvbn) + account lockout (5 hata)
-- [ ] 2FA (TOTP) — Pro planla feature-flag'li
-- [ ] Organizasyon oluşturma + güncelleme
-- [ ] Ekip daveti + rol yönetimi (Owner/Admin/Member/Viewer)
-- [ ] Tenant scoping altyapısı (repository katmanı + otomatik filter)
-- [ ] RBAC middleware (endpoint bazlı rol kontrolü)
-- [ ] Frontend: login/register/verify/reset/2fa ekranları
-- [ ] Frontend: org ayarları + ekip yönetimi sayfası
-- [ ] Unit test: auth servisi, tenant scoping
-- [ ] Integration test: register → verify → login akışı
+- [x] Veri modeli: `User`, `Organization`, `Membership`, `Invitation`
+- [x] Register + email doğrulama (verification token)
+- [x] Login → JWT (access + refresh) + rotation
+- [x] Şifre sıfırlama (reset token)
+- [x] Password strength (zxcvbn) + account lockout (5 hata)
+- [x] 2FA (TOTP) — Pro planla feature-flag'li
+- [x] Organizasyon oluşturma + güncelleme
+- [x] Ekip daveti + rol yönetimi (Owner/Admin/Member/Viewer)
+- [x] Tenant scoping altyapısı (repository katmanı + otomatik filter)
+- [x] RBAC middleware (endpoint bazlı rol kontrolü)
+- [x] Frontend: login/register/verify/reset ekranları
+- [x] Frontend: org ayarları + ekip yönetimi sayfası
+- [x] Unit test: auth servisi, tenant scoping
+- [x] Integration test: register → verify → login akışı
 
 ### Teslim Kriteri
 - Kullanıcı register olabilir, email doğrular, giriş yapar.

@@ -1,8 +1,12 @@
 from fastapi import APIRouter
 
+from app.api.v1 import auth, organizations
 from app.core.config import settings
 
 router = APIRouter()
+
+router.include_router(auth.router)
+router.include_router(organizations.router)
 
 
 @router.get("/health", tags=["system"])
