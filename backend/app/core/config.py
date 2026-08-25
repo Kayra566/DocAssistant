@@ -69,6 +69,17 @@ class Settings(BaseSettings):
     LLM_PROVIDER: Literal["ollama", "openai", "fake"] = "fake"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.1:8b"
+    LLM_TIMEOUT_SECONDS: int = 60
+    RAG_TOP_K: int = 5
+
+    # AI kotası (aylık token bütçesi, plan bazlı)
+    QUOTA_FREE_AI_TOKENS: int = 100_000
+    QUOTA_PRO_AI_TOKENS: int = 2_000_000
+    QUOTA_BUSINESS_AI_TOKENS: int = 20_000_000
+
+    # AI sonuç önbelleği
+    AI_CACHE_BACKEND: Literal["memory", "redis"] = "memory"
+    AI_CACHE_TTL_SECONDS: int = 86400
 
     @property
     def cors_origins_list(self) -> list[str]:

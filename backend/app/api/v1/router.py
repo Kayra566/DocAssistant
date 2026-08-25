@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, documents, organizations
+from app.api.v1 import ai, auth, documents, organizations
 from app.core.config import settings
 
 router = APIRouter()
@@ -8,6 +8,7 @@ router = APIRouter()
 router.include_router(auth.router)
 router.include_router(organizations.router)
 router.include_router(documents.router)
+router.include_router(ai.router)
 
 
 @router.get("/health", tags=["system"])
