@@ -58,3 +58,35 @@ export interface Document {
   is_favorite: boolean;
   created_at: string;
 }
+
+export interface Citation {
+  document_id: string;
+  page: number;
+  chunk_index: number;
+  snippet: string;
+  score: number;
+}
+
+export interface ChatResponse {
+  conversation_id: string;
+  message_id: string;
+  answer: string;
+  citations: Citation[];
+  tokens_used: number;
+  cache_hit: boolean;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  citations: Citation[] | null;
+  tokens: number;
+  created_at: string;
+}
+
+export interface Usage {
+  plan: string;
+  ai_tokens_used: number;
+  ai_tokens_limit: number;
+}

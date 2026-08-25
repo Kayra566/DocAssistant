@@ -114,6 +114,14 @@ export default function DocumentsPage() {
                 >
                   ★
                 </button>
+                {doc.status === "ready" && (
+                  <Link
+                    to={`/organizations/${orgId}/documents/${doc.id}/chat`}
+                    className="rounded-md bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-500"
+                  >
+                    Sohbet
+                  </Link>
+                )}
                 <Button
                   variant="danger"
                   className="px-2 py-1 text-xs"

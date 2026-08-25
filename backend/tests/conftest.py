@@ -36,6 +36,19 @@ def _isolated_storage(tmp_path):
     storage_module._storage = None
 
 
+@pytest.fixture(autouse=True)
+def _reset_ai_singletons():
+    """AI cache/provider singleton'larını testler arası sıfırla."""
+    import app.ai.cache as cache_module
+    import app.ai.provider as provider_module
+
+    cache_module._cache = None
+    provider_module._provider = None
+    yield
+    cache_module._cache = None
+    provider_module._provider = None
+
+
 @pytest.fixture
 async def client():
     async def _override_get_db():

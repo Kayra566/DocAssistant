@@ -111,24 +111,24 @@ docker-compose up
 **Hedef:** Dokümanla soru-cevap, sayfa referanslı yanıt, streaming.
 
 ### Görevler
-- [ ] LLM provider soyutlama (yerel: Ollama veya llama.cpp HTTP API)
+- [x] LLM provider soyutlama (yerel: Ollama HTTP API + fake sağlayıcı)
   - Retry/timeout + fallback (OpenAI API yedek olarak opsiyonel)
-- [ ] RAG servisi:
-  - Soru → embedding → pgvector similarity search
+- [x] RAG servisi:
+  - Soru → embedding → similarity search
   - Chunk'ları context'e ekle + prompt template
   - LLM → yanıt + sayfa referansları (metadata'dan)
-- [ ] Streaming (SSE) — token token cevap akışı
-- [ ] Prompt injection guard (input validation + prompt template güvenliği)
-- [ ] AI çıktı moderasyonu (zararlı içerik filtresi - basit regex başlangıç)
-- [ ] Token/maliyet takibi:
-  - Yerel LLM için token sayma (tiktoken / model tokenizer)
-  - Tahmini maliyet (opsiyonel — kendi maliyetiniz yoksa sıfır)
+- [x] Streaming (SSE) — token token cevap akışı
+- [x] Prompt injection guard (input validation + prompt template güvenliği)
+- [x] AI çıktı moderasyonu (basit hook — Faz 7'de genişleyecek)
+- [x] Token/maliyet takibi:
+  - Token sayma (kaba tahmin; gerçek tokenizer'a geçiş açık)
+  - Tahmini maliyet (yerel için 0)
   - Kota kontrolü: tenant bazlı aylık token limiti
-- [ ] AI sonuç önbellekleme (Redis: `doc_id + query hash → result`, 1 gün TTL)
-- [ ] Veri modeli: `AIJob` (type=chat, status, tokens_used, cost)
-- [ ] Frontend: chat UI (mesaj listesi + input + streaming yanıt)
-- [ ] Frontend: sayfa referansları tıklanınca PDF viewer'da o sayfa
-- [ ] Test: RAG doğruluğu (fixture doküman + soru → beklenen yanıt)
+- [x] AI sonuç önbellekleme (`doc_id + query hash → result`; memory/redis)
+- [x] Veri modeli: `AIJob` (type=chat, status, tokens_used, cost) + Conversation/ChatMessage
+- [x] Frontend: chat UI (mesaj listesi + input + citations)
+- [ ] Frontend: sayfa referansları tıklanınca PDF viewer'da o sayfa — Faz 6'ya ertelendi
+- [x] Test: RAG doğruluğu (fixture doküman + soru → citations)
 
 ### Teslim Kriteri
 - Kullanıcı PDF yükler, "Bu dokümanda ne yazıyor?" sorar.
