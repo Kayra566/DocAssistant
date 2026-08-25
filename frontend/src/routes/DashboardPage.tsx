@@ -63,12 +63,20 @@ export default function DashboardPage() {
                 {org.name}{" "}
                 <span className="text-xs uppercase text-neutral-500">{org.plan}</span>
               </span>
-              <Link
-                to={`/organizations/${org.id}/team`}
-                className="text-sm text-indigo-400 hover:underline"
-              >
-                Ekip →
-              </Link>
+              <div className="flex gap-3">
+                <Link
+                  to={`/organizations/${org.id}/documents`}
+                  className="text-sm text-indigo-400 hover:underline"
+                >
+                  Dokümanlar →
+                </Link>
+                <Link
+                  to={`/organizations/${org.id}/team`}
+                  className="text-sm text-indigo-400 hover:underline"
+                >
+                  Ekip →
+                </Link>
+              </div>
             </li>
           ))}
         </ul>

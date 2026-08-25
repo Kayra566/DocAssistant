@@ -1,3 +1,4 @@
+from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.enums import ROLE_LEVEL, Plan, Role
 from app.models.organization import Invitation, Membership, Organization
 from app.models.user import (
@@ -18,4 +19,7 @@ __all__ = [
     "Organization",
     "Membership",
     "Invitation",
+    "Document",
+    "DocumentChunk",
+    "DocumentStatus",
 ]

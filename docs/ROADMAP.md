@@ -81,23 +81,23 @@ docker-compose up
 
 ### Görevler
 - [ ] MinIO entegrasyonu (local) + S3 adapter (prod)
-- [ ] Veri modeli: `Document`, `DocumentChunk` (metadata: page, bbox)
-- [ ] Upload endpoint + magic-bytes doğrulama + boyut limiti
-- [ ] Batch upload (toplu)
-- [ ] Malware scan (ClamAV / VirusTotal API)
-- [ ] Liste/sil/favori API'ları
-- [ ] Signed URL oluşturma (indirme için, 1 saat TTL)
-- [ ] Celery worker kurulumu
-- [ ] İşleme pipeline (task):
-  - PDF/DOCX/XLSX/PPTX/TXT/MD → metin çıkarma (PyPDF2/python-docx/openpyxl)
-  - Resim → OCR (Tesseract / Azure OCR)
-  - Chunking (LangChain RecursiveCharacterTextSplitter, sayfa eşlemeli)
-  - Embedding (yerel model: sentence-transformers/all-MiniLM-L6-v2)
-  - pgvector → kayıt (sayfa + chunk metadatası)
-- [ ] Doküman durumu izleme: `uploaded` → `processing` → `ready` / `failed`
-- [ ] Frontend: drag-drop yükleme (react-dropzone), progress bar
-- [ ] Frontend: doküman listesi (tablo + arama + filter)
-- [ ] Test: upload → işleme → vector store → sorgulama (E2E)
+- [x] Veri modeli: `Document`, `DocumentChunk` (metadata: page, bbox)
+- [x] Upload endpoint + magic-bytes doğrulama + boyut limiti
+- [x] Batch upload (toplu)
+- [ ] Malware scan (ClamAV / VirusTotal API) — Faz 7'ye ertelendi
+- [x] Liste/sil/favori API'ları
+- [x] Signed URL oluşturma (indirme için, 1 saat TTL)
+- [x] Celery worker kurulumu (eager mod + task)
+- [x] İşleme pipeline (task):
+  - PDF/DOCX/XLSX/PPTX/TXT/MD → metin çıkarma (pypdf/python-docx/openpyxl/python-pptx)
+  - Resim → OCR (Tesseract, opsiyonel/feature-flag)
+  - Chunking (örtüşmeli, sayfa eşlemeli)
+  - Embedding (hashing embedder; sentence-transformers'a geçiş açık)
+  - Vektör kaydı (JSON embedding; pgvector'a geçiş yolu açık)
+- [x] Doküman durumu izleme: `uploaded` → `processing` → `ready` / `failed`
+- [x] Frontend: drag-drop yükleme (react-dropzone)
+- [x] Frontend: doküman listesi
+- [x] Test: upload → işleme → chunk → indirme (E2E)
 
 ### Teslim Kriteri
 - PDF yüklenir, otomatik işlenir, "ready" olur.

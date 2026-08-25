@@ -31,6 +31,7 @@ postgres_data/
 minio_data/
 redis_data/
 ollama_data/
+_storage/
 
 # ---------- Visual Studio (default template) ----------
 ## Ignore Visual Studio temporary files, build results, and

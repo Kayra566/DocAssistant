@@ -50,6 +50,23 @@ def decode_token(token: str) -> dict[str, Any]:
     return jwt.decode(token, settings.JWT_SECRET, algorithms=[ALGORITHM])
 
 
+def create_download_token(document_id: str) -> str:
+    """Kısa ömürlü, imzalı dosya indirme token'ı (signed URL)."""
+    payload = {
+        "sub": document_id,
+        "type": "download",
+        "exp": _now() + timedelta(minutes=settings.SIGNED_URL_EXPIRE_MINUTES),
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=ALGORITHM)
+
+
+def verify_download_token(token: str) -> str:
+    payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[ALGORITHM])
+    if payload.get("type") != "download":
+        raise ValueError("Geçersiz indirme token türü.")
+    return payload["sub"]
+
+
 def generate_raw_token() -> str:
     """Client'a verilecek ham token (refresh/verification/reset/invite)."""
     return secrets.token_urlsafe(32)
