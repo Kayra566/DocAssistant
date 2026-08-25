@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
 import DashboardPage from "@/routes/DashboardPage";
+import DocumentsPage from "@/routes/DocumentsPage";
 import ForgotPasswordPage from "@/routes/ForgotPasswordPage";
 import LoginPage from "@/routes/LoginPage";
 import RegisterPage from "@/routes/RegisterPage";
@@ -21,6 +22,10 @@ export default function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/organizations/:orgId/documents"
+          element={<DocumentsPage />}
+        />
         <Route path="/organizations/:orgId/team" element={<TeamPage />} />
       </Route>
 

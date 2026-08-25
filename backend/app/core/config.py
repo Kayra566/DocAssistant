@@ -42,14 +42,31 @@ class Settings(BaseSettings):
     EXPOSE_DEV_TOKENS: bool = True
 
     # Object storage (MinIO local / S3 prod)
+    STORAGE_BACKEND: Literal["local", "s3"] = "local"
+    STORAGE_LOCAL_DIR: str = "./_storage"
     S3_ENDPOINT: str = "http://localhost:9000"
     S3_ACCESS_KEY: str = "minioadmin"
     S3_SECRET_KEY: str = "minioadmin"
     S3_BUCKET: str = "docassistant"
     S3_REGION: str = "us-east-1"
 
+    # Doküman yükleme
+    MAX_UPLOAD_SIZE_MB: int = 25
+    SIGNED_URL_EXPIRE_MINUTES: int = 60
+    # Yükleme sonrası işlemeyi Celery yerine inline (await) yap — local/test için pratik.
+    PROCESS_DOCUMENTS_EAGER: bool = True
+    ENABLE_OCR: bool = False
+    # Embedding boyutu (hashing embedder için).
+    EMBEDDING_DIM: int = 384
+    EMBEDDING_PROVIDER: Literal["hashing", "sentence_transformers"] = "hashing"
+
+    # Plan bazlı doküman kotası (Faz 5'te Stripe ile genişleyecek)
+    QUOTA_FREE_DOCUMENTS: int = 10
+    QUOTA_PRO_DOCUMENTS: int = 100
+    QUOTA_BUSINESS_DOCUMENTS: int = 100000
+
     # LLM
-    LLM_PROVIDER: Literal["ollama", "openai"] = "ollama"
+    LLM_PROVIDER: Literal["ollama", "openai", "fake"] = "fake"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.1:8b"
 

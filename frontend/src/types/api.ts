@@ -42,3 +42,19 @@ export interface MessageResponse {
   message: string;
   dev_token?: string | null;
 }
+
+export type DocumentStatus = "uploaded" | "processing" | "ready" | "failed";
+
+export interface Document {
+  id: string;
+  filename: string;
+  file_type: string;
+  mime_type: string;
+  size_bytes: number;
+  status: DocumentStatus;
+  error: string | null;
+  page_count: number;
+  chunk_count: number;
+  is_favorite: boolean;
+  created_at: string;
+}
