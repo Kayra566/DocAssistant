@@ -142,18 +142,20 @@ docker-compose up
 **Hedef:** Summary, Key Points, Quiz, Translation, Data Extraction, Compare.
 
 ### Görevler
-- [ ] **Summary:** 4 seviye (kısa/detaylı/madde/executive) — LLM prompt'ları
-- [ ] **Key Points:** Tarih, isim, sayı, karar çıkarma (NER + LLM)
-- [ ] **Quiz:** Test/doğru-yanlış/açık-uçlu sorular üret (JSON çıktı)
-- [ ] **Translation:** Kaynak dil → hedef dil (Markdown formatı koru)
-- [ ] **Data Extraction:** Tablo/liste → JSON/Excel (yapılandırılmış çıktı)
-- [ ] **Compare:** İki doküman → diff analizi (semantic diff)
-- [ ] Prompt şablonları (M9): hukuk/akademik/iş — preset'ler
-- [ ] Her özellik için:
-  - Celery task (uzun işlemler async)
-  - Token takibi + cache
-  - Frontend: özel UI (örn. Quiz → soru kartları)
-- [ ] Test: her özellik için en az 1 E2E test
+- [x] **Summary:** 4 seviye (kısa/detaylı/madde/executive) — LLM prompt'ları
+- [x] **Key Points:** Tarih, isim, sayı, karar çıkarma (JSON çıktı)
+- [x] **Quiz:** Test/doğru-yanlış/açık-uçlu sorular üret (JSON çıktı)
+- [x] **Translation:** Kaynak dil → hedef dil (Markdown formatı koru)
+- [x] **Data Extraction:** Tablo/liste → JSON (yapılandırılmış çıktı)
+  - Excel export → Faz 6'ya (M9 Export) ertelendi
+- [x] **Compare:** İki doküman → diff analizi (only_in_a / only_in_b / changed)
+- [x] Prompt şablonları (M9): hukuk/akademik/iş — preset'ler
+- [x] Her özellik için:
+  - Celery task (`ai.run_job`; `AI_JOBS_EAGER=false` ile async)
+  - Token takibi + kota + sonuç önbelleği
+  - `AIJob.params` / `AIJob.result` ile kalıcılık + geçmiş erişimi
+  - Frontend: özel UI (Quiz → soru kartları, Extract → tablo, Compare → diff)
+- [x] Test: her özellik için en az 1 E2E test
 
 ### Teslim Kriteri
 - Tüm 7 AI özelliği çalışır, sonuçlar kaydedilir, kullanıcı tekrar erişebilir.

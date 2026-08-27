@@ -81,6 +81,13 @@ class Settings(BaseSettings):
     AI_CACHE_BACKEND: Literal["memory", "redis"] = "memory"
     AI_CACHE_TTL_SECONDS: int = 86400
 
+    # AI görevleri (summary/quiz/translate...)
+    # Eager modda iş Celery yerine inline (await) çalışır — local/test için pratik.
+    AI_JOBS_EAGER: bool = True
+    # Bir göreve verilecek maksimum bağlam uzunluğu (karakter).
+    AI_TASK_CONTEXT_CHARS: int = 12000
+    AI_QUIZ_MAX_QUESTIONS: int = 20
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]

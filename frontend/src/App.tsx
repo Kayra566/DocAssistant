@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
+import AiToolsPage from "@/routes/AiToolsPage";
 import ChatPage from "@/routes/ChatPage";
 import DashboardPage from "@/routes/DashboardPage";
 import DocumentsPage from "@/routes/DocumentsPage";
@@ -30,6 +31,10 @@ export default function App() {
         <Route
           path="/organizations/:orgId/documents/:docId/chat"
           element={<ChatPage />}
+        />
+        <Route
+          path="/organizations/:orgId/documents/:docId/ai"
+          element={<AiToolsPage />}
         />
         <Route path="/organizations/:orgId/team" element={<TeamPage />} />
       </Route>

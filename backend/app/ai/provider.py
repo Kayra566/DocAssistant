@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from typing import Protocol
 
+from app.ai import fake_tasks
 from app.core.config import settings
 
 SYSTEM_PROMPT = (
@@ -19,9 +20,13 @@ class LLMProvider(Protocol):
 
 def _extract_context(prompt: str) -> str:
     """Prompt içindeki BAĞLAM bölümünü çıkarır (fake provider için)."""
-    if "BAĞLAM:" in prompt and "SORU:" in prompt:
-        return prompt.split("BAĞLAM:", 1)[1].split("SORU:", 1)[0].strip()
-    return prompt.strip()
+    if "BAĞLAM:" not in prompt:
+        return prompt.strip()
+    body = prompt.split("BAĞLAM:", 1)[1]
+    for terminator in ("SORU:", "YANIT:"):
+        if terminator in body:
+            body = body.split(terminator, 1)[0]
+    return body.strip()
 
 
 class FakeProvider:
@@ -29,6 +34,11 @@ class FakeProvider:
 
     async def complete(self, *, system: str, prompt: str) -> str:
         context = _extract_context(prompt)
+        task = fake_tasks.detect_task(prompt)
+        if task:
+            response = fake_tasks.fake_task_response(task, prompt, context)
+            if response is not None:
+                return response
         snippet = " ".join(context.split())[:200]
         if not snippet:
             return "Bu bilgi dokümanda bulunmuyor."

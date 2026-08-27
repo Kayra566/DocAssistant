@@ -90,3 +90,49 @@ export interface Usage {
   ai_tokens_used: number;
   ai_tokens_limit: number;
 }
+
+export type AIJobType =
+  | "chat"
+  | "summary"
+  | "keypoints"
+  | "quiz"
+  | "translate"
+  | "extract"
+  | "compare";
+
+export type AIJobStatus = "pending" | "running" | "done" | "failed";
+
+export type SummaryLevel = "short" | "detailed" | "bullets" | "executive";
+export type PromptPreset = "genel" | "hukuk" | "akademik" | "is";
+export type QuizType = "multiple_choice" | "true_false" | "open_ended";
+
+export interface QuizQuestion {
+  type: QuizType;
+  question: string;
+  options: string[];
+  answer: string;
+  page?: number;
+}
+
+export interface AIJob {
+  id: string;
+  document_id: string | null;
+  type: AIJobType;
+  status: AIJobStatus;
+  params: Record<string, unknown> | null;
+  result: Record<string, unknown> | null;
+  error: string | null;
+  tokens_used: number;
+  cache_hit: boolean;
+  created_at: string;
+}
+
+export interface PresetInfo {
+  key: string;
+  description: string;
+}
+
+export interface PromptPresets {
+  presets: PresetInfo[];
+  summary_levels: PresetInfo[];
+}
