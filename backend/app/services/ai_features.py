@@ -24,7 +24,9 @@ from app.ai.tokens import estimate_tokens
 from app.core.config import settings
 from app.core.exceptions import NotFoundError, ValidationError
 from app.models.ai import AIJob, AIJobStatus, AIJobType
+from app.models.billing import UsageMetric
 from app.models.document import DocumentChunk
+from app.services import usage
 from app.services.ai_chat import load_ready_document
 from app.services.quota import ensure_ai_quota
 
@@ -171,6 +173,10 @@ async def run_job(db: AsyncSession, job: AIJob) -> AIJob:
             cache.set(key, job.result, settings.AI_CACHE_TTL_SECONDS)
         job.status = AIJobStatus.DONE
         job.error = None
+        await usage.record(db, job.organization_id, UsageMetric.AI_REQUESTS, 1)
+        await usage.record(
+            db, job.organization_id, UsageMetric.AI_TOKENS, job.tokens_used
+        )
     except Exception as exc:
         job.status = AIJobStatus.FAILED
         job.error = str(exc)[:1000]

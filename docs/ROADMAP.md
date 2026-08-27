@@ -167,22 +167,22 @@ docker-compose up
 **Hedef:** Stripe abonelik + tier bazlı kota sistemi.
 
 ### Görevler
-- [ ] Stripe entegrasyonu (test modu)
-- [ ] Veri modeli: `Subscription`, `UsageRecord`
-- [ ] 3 plan tanımı:
+- [x] Stripe entegrasyonu (test modu) + `fake` sağlayıcı (dev/test için)
+- [x] Veri modeli: `Subscription`, `UsageRecord`, `WebhookEvent`
+- [x] 3 plan tanımı:
   - **Free:** 10 doküman, 100 AI istek/ay, 50 MB depolama
   - **Pro:** 100 doküman, 1000 AI istek/ay, 1 GB, 2FA
   - **Business:** sınırsız doküman, 10000 AI istek/ay, 10 GB, öncelikli destek
-- [ ] Checkout session + redirect
-- [ ] Customer portal (plan değiştir, iptal et)
-- [ ] Webhook endpoint + idempotency (event log tablosu)
-- [ ] Reconciliation job (günlük Stripe durumu senkronize et)
-- [ ] Kota zorlama:
-  - Doküman yükleme/AI istek öncesi kontrol
+- [x] Checkout session + redirect
+- [x] Customer portal (plan değiştir, iptal et)
+- [x] Webhook endpoint + idempotency (`webhook_events` event log tablosu)
+- [x] Reconciliation job (günlük Stripe durumu senkronize et — Celery beat)
+- [x] Kota zorlama:
+  - Doküman/depolama ve AI istek/token kontrolü işlem öncesi
   - Aşımda HTTP 402 Payment Required + mesaj
-- [ ] Usage tracking (aylık reset)
-- [ ] Frontend: fiyatlandırma sayfası + upgrade flow
-- [ ] Test: webhook mock, kota aşımı senaryosu
+- [x] Usage tracking (aylık reset — `period_start` bazlı sayaçlar)
+- [x] Frontend: fiyatlandırma sayfası + upgrade flow + kota progress bar
+- [x] Test: webhook mock, idempotency, kota aşımı, reconciliation senaryoları
 
 ### Teslim Kriteri
 - Kullanıcı Free planla başlar, 10. dokümanda bloke olur.

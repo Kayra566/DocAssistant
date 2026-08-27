@@ -5,6 +5,13 @@ from app.models.ai import (
     ChatMessage,
     Conversation,
 )
+from app.models.billing import (
+    Subscription,
+    SubscriptionStatus,
+    UsageMetric,
+    UsageRecord,
+    WebhookEvent,
+)
 from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.enums import ROLE_LEVEL, Plan, Role
 from app.models.organization import Invitation, Membership, Organization
@@ -34,4 +41,9 @@ __all__ = [
     "AIJobType",
     "Conversation",
     "ChatMessage",
+    "Subscription",
+    "SubscriptionStatus",
+    "UsageMetric",
+    "UsageRecord",
+    "WebhookEvent",
 ]

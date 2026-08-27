@@ -65,6 +65,29 @@ class Settings(BaseSettings):
     QUOTA_PRO_DOCUMENTS: int = 100
     QUOTA_BUSINESS_DOCUMENTS: int = 100000
 
+    # Plan bazlı depolama kotası (MB)
+    QUOTA_FREE_STORAGE_MB: int = 50
+    QUOTA_PRO_STORAGE_MB: int = 1024
+    QUOTA_BUSINESS_STORAGE_MB: int = 10240
+
+    # Plan bazlı aylık AI istek kotası
+    QUOTA_FREE_AI_REQUESTS: int = 100
+    QUOTA_PRO_AI_REQUESTS: int = 1000
+    QUOTA_BUSINESS_AI_REQUESTS: int = 10000
+
+    # Ödeme (Stripe)
+    BILLING_PROVIDER: Literal["fake", "stripe"] = "fake"
+    BILLING_CURRENCY: str = "USD"
+    PRICE_PRO_MONTHLY: int = 19
+    PRICE_BUSINESS_MONTHLY: int = 99
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_PRICE_PRO: str = "price_pro_monthly"
+    STRIPE_PRICE_BUSINESS: str = "price_business_monthly"
+    BILLING_SUCCESS_URL: str = "http://localhost:5173/billing?status=success"
+    BILLING_CANCEL_URL: str = "http://localhost:5173/billing?status=cancel"
+    BILLING_PORTAL_RETURN_URL: str = "http://localhost:5173/billing"
+
     # LLM
     LLM_PROVIDER: Literal["ollama", "openai", "fake"] = "fake"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
