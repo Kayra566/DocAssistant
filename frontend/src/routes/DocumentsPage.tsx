@@ -122,6 +122,14 @@ export default function DocumentsPage() {
                     Sohbet
                   </Link>
                 )}
+                {doc.status === "ready" && (
+                  <Link
+                    to={`/organizations/${orgId}/documents/${doc.id}/ai`}
+                    className="rounded-md border border-indigo-600 px-2 py-1 text-xs text-indigo-300 hover:bg-indigo-600/20"
+                  >
+                    AI Araçları
+                  </Link>
+                )}
                 <Button
                   variant="danger"
                   className="px-2 py-1 text-xs"

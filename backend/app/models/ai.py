@@ -3,6 +3,7 @@ import uuid
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     Enum,
     ForeignKey,
     Integer,
@@ -43,7 +44,7 @@ class AIJob(BaseModel):
         Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     document_id: Mapped[uuid.UUID | None] = mapped_column(
-        Uuid, ForeignKey("documents.id", ondelete="SET NULL"), nullable=True
+        Uuid, ForeignKey("documents.id", ondelete="SET NULL"), nullable=True, index=True
     )
     type: Mapped[AIJobType] = mapped_column(Enum(AIJobType, native_enum=False))
     status: Mapped[AIJobStatus] = mapped_column(
@@ -51,6 +52,12 @@ class AIJob(BaseModel):
     )
     tokens_used: Mapped[int] = mapped_column(Integer, default=0)
     cost: Mapped[float] = mapped_column(Numeric(10, 6), default=0)
+    # Görev girdileri (ör. {"level": "short", "preset": "hukuk"})
+    params: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Görev çıktısı (metin veya yapılandırılmış JSON)
+    result: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cache_hit: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class Conversation(BaseModel):

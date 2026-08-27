@@ -18,7 +18,7 @@ from app.models.document import Document, DocumentStatus
 from app.services.quota import ensure_ai_quota
 
 
-async def _load_ready_document(
+async def load_ready_document(
     db: AsyncSession, org_id: uuid.UUID, document_id: uuid.UUID
 ) -> Document:
     doc = (
@@ -79,7 +79,7 @@ async def chat(
     conversation_id: uuid.UUID | None = None,
 ) -> dict:
     question = sanitize_question(question)
-    doc = await _load_ready_document(db, org_id, document_id)
+    doc = await load_ready_document(db, org_id, document_id)
 
     prompt_estimate = estimate_tokens(question)
     await ensure_ai_quota(db, org_id, prompt_estimate)
@@ -166,7 +166,7 @@ async def stream_chat(
 ) -> AsyncIterator[str]:
     """SSE için token akışı (kalıcılık yapmaz; hafif önizleme)."""
     question = sanitize_question(question)
-    doc = await _load_ready_document(db, org_id, document_id)
+    doc = await load_ready_document(db, org_id, document_id)
     await ensure_ai_quota(db, org_id, estimate_tokens(question))
 
     scored = await rag.retrieve(
