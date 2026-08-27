@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
 import AiToolsPage from "@/routes/AiToolsPage";
+import BillingPage from "@/routes/BillingPage";
 import ChatPage from "@/routes/ChatPage";
 import DashboardPage from "@/routes/DashboardPage";
 import DocumentsPage from "@/routes/DocumentsPage";
@@ -37,6 +38,7 @@ export default function App() {
           element={<AiToolsPage />}
         />
         <Route path="/organizations/:orgId/team" element={<TeamPage />} />
+        <Route path="/organizations/:orgId/billing" element={<BillingPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

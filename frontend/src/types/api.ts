@@ -136,3 +136,46 @@ export interface PromptPresets {
   presets: PresetInfo[];
   summary_levels: PresetInfo[];
 }
+
+export type SubscriptionStatus =
+  | "active"
+  | "trialing"
+  | "past_due"
+  | "canceled"
+  | "incomplete";
+
+export interface PlanSpec {
+  key: Plan;
+  name: string;
+  price_monthly: number;
+  currency: string;
+  documents: number;
+  storage_mb: number;
+  ai_requests: number;
+  ai_tokens: number;
+  features: string[];
+}
+
+export interface Subscription {
+  id: string;
+  organization_id: string;
+  plan: Plan;
+  status: SubscriptionStatus;
+  cancel_at_period_end: boolean;
+  current_period_end: string | null;
+}
+
+export interface BillingUsage {
+  plan: Plan;
+  status: SubscriptionStatus;
+  cancel_at_period_end: boolean;
+  current_period_end: string | null;
+  documents_used: number;
+  documents_limit: number;
+  storage_bytes_used: number;
+  storage_bytes_limit: number;
+  ai_requests_used: number;
+  ai_requests_limit: number;
+  ai_tokens_used: number;
+  ai_tokens_limit: number;
+}

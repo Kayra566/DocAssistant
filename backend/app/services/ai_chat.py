@@ -14,7 +14,9 @@ from app.ai.tokens import estimate_tokens
 from app.core.config import settings
 from app.core.exceptions import NotFoundError
 from app.models.ai import AIJob, AIJobStatus, AIJobType, ChatMessage, Conversation
+from app.models.billing import UsageMetric
 from app.models.document import Document, DocumentStatus
+from app.services import usage
 from app.services.quota import ensure_ai_quota
 
 
@@ -134,6 +136,7 @@ async def chat(
     db.add(assistant_msg)
 
     # Kota takibi için AIJob kaydı (cache hit'te token 0 sayılır).
+    billable = 0 if cache_hit else tokens
     db.add(
         AIJob(
             organization_id=org_id,
@@ -141,9 +144,11 @@ async def chat(
             document_id=doc.id,
             type=AIJobType.CHAT,
             status=AIJobStatus.DONE,
-            tokens_used=0 if cache_hit else tokens,
+            tokens_used=billable,
         )
     )
+    await usage.record(db, org_id, UsageMetric.AI_REQUESTS, 1)
+    await usage.record(db, org_id, UsageMetric.AI_TOKENS, billable)
     await db.commit()
     await db.refresh(assistant_msg)
 
@@ -152,7 +157,7 @@ async def chat(
         "message_id": assistant_msg.id,
         "answer": answer,
         "citations": citations,
-        "tokens_used": 0 if cache_hit else tokens,
+        "tokens_used": billable,
         "cache_hit": cache_hit,
     }
 

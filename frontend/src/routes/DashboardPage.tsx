@@ -76,6 +76,12 @@ export default function DashboardPage() {
                 >
                   Ekip →
                 </Link>
+                <Link
+                  to={`/organizations/${org.id}/billing`}
+                  className="text-sm text-indigo-400 hover:underline"
+                >
+                  Plan →
+                </Link>
               </div>
             </li>
           ))}
