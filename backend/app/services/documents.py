@@ -61,7 +61,7 @@ async def upload_document(
 ) -> Document:
     validate_size(len(data))
     file_type = detect_file_type(filename, data)
-    await ensure_document_quota(db, org_id)
+    await ensure_document_quota(db, org_id, len(data))
 
     doc_id = uuid.uuid4()
     storage_key = f"{org_id}/{doc_id}/{filename}"

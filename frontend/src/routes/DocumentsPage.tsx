@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Link, useParams } from "react-router-dom";
 
+import { ShareDialog } from "@/components/shared/ShareDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { documentApi, formatBytes } from "@/features/documents/api";
-import type { DocumentStatus } from "@/types/api";
+import type { Document, DocumentStatus } from "@/types/api";
 
 const statusColor: Record<DocumentStatus, string> = {
   uploaded: "text-neutral-400",
@@ -18,6 +19,7 @@ const statusColor: Record<DocumentStatus, string> = {
 export default function DocumentsPage() {
   const { orgId = "" } = useParams();
   const queryClient = useQueryClient();
+  const [sharing, setSharing] = useState<Document | null>(null);
 
   const docsQuery = useQuery({
     queryKey: ["documents", orgId],
@@ -114,6 +116,29 @@ export default function DocumentsPage() {
                 >
                   ★
                 </button>
+                {doc.status === "ready" && (
+                  <Link
+                    to={`/organizations/${orgId}/documents/${doc.id}/chat`}
+                    className="rounded-md bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-500"
+                  >
+                    Sohbet
+                  </Link>
+                )}
+                {doc.status === "ready" && (
+                  <Link
+                    to={`/organizations/${orgId}/documents/${doc.id}/ai`}
+                    className="rounded-md border border-indigo-600 px-2 py-1 text-xs text-indigo-300 hover:bg-indigo-600/20"
+                  >
+                    AI Araçları
+                  </Link>
+                )}
+                <Button
+                  variant="ghost"
+                  className="border border-neutral-700 px-2 py-1 text-xs"
+                  onClick={() => setSharing(doc)}
+                >
+                  Paylaş
+                </Button>
                 <Button
                   variant="danger"
                   className="px-2 py-1 text-xs"
@@ -126,6 +151,15 @@ export default function DocumentsPage() {
           ))}
         </ul>
       </Card>
+
+      {sharing && (
+        <ShareDialog
+          orgId={orgId}
+          documentId={sharing.id}
+          filename={sharing.filename}
+          onClose={() => setSharing(null)}
+        />
+      )}
     </div>
   );
 }

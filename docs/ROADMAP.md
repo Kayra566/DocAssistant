@@ -111,24 +111,24 @@ docker-compose up
 **Hedef:** Dokümanla soru-cevap, sayfa referanslı yanıt, streaming.
 
 ### Görevler
-- [ ] LLM provider soyutlama (yerel: Ollama veya llama.cpp HTTP API)
+- [x] LLM provider soyutlama (yerel: Ollama HTTP API + fake sağlayıcı)
   - Retry/timeout + fallback (OpenAI API yedek olarak opsiyonel)
-- [ ] RAG servisi:
-  - Soru → embedding → pgvector similarity search
+- [x] RAG servisi:
+  - Soru → embedding → similarity search
   - Chunk'ları context'e ekle + prompt template
   - LLM → yanıt + sayfa referansları (metadata'dan)
-- [ ] Streaming (SSE) — token token cevap akışı
-- [ ] Prompt injection guard (input validation + prompt template güvenliği)
-- [ ] AI çıktı moderasyonu (zararlı içerik filtresi - basit regex başlangıç)
-- [ ] Token/maliyet takibi:
-  - Yerel LLM için token sayma (tiktoken / model tokenizer)
-  - Tahmini maliyet (opsiyonel — kendi maliyetiniz yoksa sıfır)
+- [x] Streaming (SSE) — token token cevap akışı
+- [x] Prompt injection guard (input validation + prompt template güvenliği)
+- [x] AI çıktı moderasyonu (basit hook — Faz 7'de genişleyecek)
+- [x] Token/maliyet takibi:
+  - Token sayma (kaba tahmin; gerçek tokenizer'a geçiş açık)
+  - Tahmini maliyet (yerel için 0)
   - Kota kontrolü: tenant bazlı aylık token limiti
-- [ ] AI sonuç önbellekleme (Redis: `doc_id + query hash → result`, 1 gün TTL)
-- [ ] Veri modeli: `AIJob` (type=chat, status, tokens_used, cost)
-- [ ] Frontend: chat UI (mesaj listesi + input + streaming yanıt)
-- [ ] Frontend: sayfa referansları tıklanınca PDF viewer'da o sayfa
-- [ ] Test: RAG doğruluğu (fixture doküman + soru → beklenen yanıt)
+- [x] AI sonuç önbellekleme (`doc_id + query hash → result`; memory/redis)
+- [x] Veri modeli: `AIJob` (type=chat, status, tokens_used, cost) + Conversation/ChatMessage
+- [x] Frontend: chat UI (mesaj listesi + input + citations)
+- [ ] Frontend: sayfa referansları tıklanınca PDF viewer'da o sayfa — Faz 6'ya ertelendi
+- [x] Test: RAG doğruluğu (fixture doküman + soru → citations)
 
 ### Teslim Kriteri
 - Kullanıcı PDF yükler, "Bu dokümanda ne yazıyor?" sorar.
@@ -142,18 +142,20 @@ docker-compose up
 **Hedef:** Summary, Key Points, Quiz, Translation, Data Extraction, Compare.
 
 ### Görevler
-- [ ] **Summary:** 4 seviye (kısa/detaylı/madde/executive) — LLM prompt'ları
-- [ ] **Key Points:** Tarih, isim, sayı, karar çıkarma (NER + LLM)
-- [ ] **Quiz:** Test/doğru-yanlış/açık-uçlu sorular üret (JSON çıktı)
-- [ ] **Translation:** Kaynak dil → hedef dil (Markdown formatı koru)
-- [ ] **Data Extraction:** Tablo/liste → JSON/Excel (yapılandırılmış çıktı)
-- [ ] **Compare:** İki doküman → diff analizi (semantic diff)
-- [ ] Prompt şablonları (M9): hukuk/akademik/iş — preset'ler
-- [ ] Her özellik için:
-  - Celery task (uzun işlemler async)
-  - Token takibi + cache
-  - Frontend: özel UI (örn. Quiz → soru kartları)
-- [ ] Test: her özellik için en az 1 E2E test
+- [x] **Summary:** 4 seviye (kısa/detaylı/madde/executive) — LLM prompt'ları
+- [x] **Key Points:** Tarih, isim, sayı, karar çıkarma (JSON çıktı)
+- [x] **Quiz:** Test/doğru-yanlış/açık-uçlu sorular üret (JSON çıktı)
+- [x] **Translation:** Kaynak dil → hedef dil (Markdown formatı koru)
+- [x] **Data Extraction:** Tablo/liste → JSON (yapılandırılmış çıktı)
+  - Excel export → Faz 6'ya (M9 Export) ertelendi
+- [x] **Compare:** İki doküman → diff analizi (only_in_a / only_in_b / changed)
+- [x] Prompt şablonları (M9): hukuk/akademik/iş — preset'ler
+- [x] Her özellik için:
+  - Celery task (`ai.run_job`; `AI_JOBS_EAGER=false` ile async)
+  - Token takibi + kota + sonuç önbelleği
+  - `AIJob.params` / `AIJob.result` ile kalıcılık + geçmiş erişimi
+  - Frontend: özel UI (Quiz → soru kartları, Extract → tablo, Compare → diff)
+- [x] Test: her özellik için en az 1 E2E test
 
 ### Teslim Kriteri
 - Tüm 7 AI özelliği çalışır, sonuçlar kaydedilir, kullanıcı tekrar erişebilir.
@@ -165,22 +167,22 @@ docker-compose up
 **Hedef:** Stripe abonelik + tier bazlı kota sistemi.
 
 ### Görevler
-- [ ] Stripe entegrasyonu (test modu)
-- [ ] Veri modeli: `Subscription`, `UsageRecord`
-- [ ] 3 plan tanımı:
+- [x] Stripe entegrasyonu (test modu) + `fake` sağlayıcı (dev/test için)
+- [x] Veri modeli: `Subscription`, `UsageRecord`, `WebhookEvent`
+- [x] 3 plan tanımı:
   - **Free:** 10 doküman, 100 AI istek/ay, 50 MB depolama
   - **Pro:** 100 doküman, 1000 AI istek/ay, 1 GB, 2FA
   - **Business:** sınırsız doküman, 10000 AI istek/ay, 10 GB, öncelikli destek
-- [ ] Checkout session + redirect
-- [ ] Customer portal (plan değiştir, iptal et)
-- [ ] Webhook endpoint + idempotency (event log tablosu)
-- [ ] Reconciliation job (günlük Stripe durumu senkronize et)
-- [ ] Kota zorlama:
-  - Doküman yükleme/AI istek öncesi kontrol
+- [x] Checkout session + redirect
+- [x] Customer portal (plan değiştir, iptal et)
+- [x] Webhook endpoint + idempotency (`webhook_events` event log tablosu)
+- [x] Reconciliation job (günlük Stripe durumu senkronize et — Celery beat)
+- [x] Kota zorlama:
+  - Doküman/depolama ve AI istek/token kontrolü işlem öncesi
   - Aşımda HTTP 402 Payment Required + mesaj
-- [ ] Usage tracking (aylık reset)
-- [ ] Frontend: fiyatlandırma sayfası + upgrade flow
-- [ ] Test: webhook mock, kota aşımı senaryosu
+- [x] Usage tracking (aylık reset — `period_start` bazlı sayaçlar)
+- [x] Frontend: fiyatlandırma sayfası + upgrade flow + kota progress bar
+- [x] Test: webhook mock, idempotency, kota aşımı, reconciliation senaryoları
 
 ### Teslim Kriteri
 - Kullanıcı Free planla başlar, 10. dokümanda bloke olur.
@@ -194,21 +196,21 @@ docker-compose up
 **Hedef:** Kullanıcı deneyimi tamamlama, işbirliği özellikleri.
 
 ### Görevler
-- [ ] **Dashboard (M7):**
+- [x] **Dashboard (M7):**
   - Recharts grafikleri (kullanım trendi, AI işlem dağılımı)
   - Kota progress bar
   - Admin panel (platform yönetimi — superuser rolü)
-- [ ] **Paylaşım (M8):**
+- [x] **Paylaşım (M8):**
   - Veri modeli: `ShareLink` (token, expiry, permissions)
   - Shareable link oluşturma (public/email-specific)
   - Ekip içi doküman paylaşımı (rol bazlı izin)
   - History: işlem log'u (kim ne zaman ne yaptı)
-  - Yorum/not sistemi (M8 opsiyonel — zaman varsa)
-- [ ] **Export (M9):**
+  - Yorum/not sistemi (`DocumentComment`)
+- [x] **Export (M9):**
   - AI sonuçlarını PDF/DOCX/XLSX/MD olarak indir
   - Export API + arka plan işi (Celery)
-- [ ] Frontend: dashboard sayfası, paylaşım modal, export butonu
-- [ ] Test: share link erişim kontrolü, export format doğruluğu
+- [x] Frontend: dashboard sayfası, paylaşım modal, export butonu
+- [x] Test: share link erişim kontrolü, export format doğruluğu
 
 ### Teslim Kriteri
 - Kullanıcı dashboard'unda kullanımını görür.

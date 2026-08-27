@@ -51,3 +51,10 @@ def require_role(minimum: Role):
         return user
 
     return _dep
+
+
+async def require_superuser(user: User = Depends(get_current_user)) -> User:
+    """Platform yönetimi uçları yalnızca superuser'a açıktır."""
+    if not user.is_superuser:
+        raise PermissionError("Bu işlem için platform yöneticisi olmalısınız.")
+    return user

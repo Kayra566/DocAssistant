@@ -65,10 +65,65 @@ class Settings(BaseSettings):
     QUOTA_PRO_DOCUMENTS: int = 100
     QUOTA_BUSINESS_DOCUMENTS: int = 100000
 
+    # Plan bazlı depolama kotası (MB)
+    QUOTA_FREE_STORAGE_MB: int = 50
+    QUOTA_PRO_STORAGE_MB: int = 1024
+    QUOTA_BUSINESS_STORAGE_MB: int = 10240
+
+    # Plan bazlı aylık AI istek kotası
+    QUOTA_FREE_AI_REQUESTS: int = 100
+    QUOTA_PRO_AI_REQUESTS: int = 1000
+    QUOTA_BUSINESS_AI_REQUESTS: int = 10000
+
+    # Ödeme (Stripe)
+    BILLING_PROVIDER: Literal["fake", "stripe"] = "fake"
+    BILLING_CURRENCY: str = "USD"
+    PRICE_PRO_MONTHLY: int = 19
+    PRICE_BUSINESS_MONTHLY: int = 99
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_PRICE_PRO: str = "price_pro_monthly"
+    STRIPE_PRICE_BUSINESS: str = "price_business_monthly"
+    BILLING_SUCCESS_URL: str = "http://localhost:5173/billing?status=success"
+    BILLING_CANCEL_URL: str = "http://localhost:5173/billing?status=cancel"
+    BILLING_PORTAL_RETURN_URL: str = "http://localhost:5173/billing"
+
     # LLM
     LLM_PROVIDER: Literal["ollama", "openai", "fake"] = "fake"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.1:8b"
+    LLM_TIMEOUT_SECONDS: int = 60
+    RAG_TOP_K: int = 5
+
+    # AI kotası (aylık token bütçesi, plan bazlı)
+    QUOTA_FREE_AI_TOKENS: int = 100_000
+    QUOTA_PRO_AI_TOKENS: int = 2_000_000
+    QUOTA_BUSINESS_AI_TOKENS: int = 20_000_000
+
+    # AI sonuç önbelleği
+    AI_CACHE_BACKEND: Literal["memory", "redis"] = "memory"
+    AI_CACHE_TTL_SECONDS: int = 86400
+
+    # AI görevleri (summary/quiz/translate...)
+    # Eager modda iş Celery yerine inline (await) çalışır — local/test için pratik.
+    AI_JOBS_EAGER: bool = True
+    # Bir göreve verilecek maksimum bağlam uzunluğu (karakter).
+    AI_TASK_CONTEXT_CHARS: int = 12000
+    AI_QUIZ_MAX_QUESTIONS: int = 20
+
+    # Paylaşım bağlantıları
+    SHARE_LINK_DEFAULT_EXPIRE_HOURS: int = 168  # 7 gün
+    SHARE_LINK_MAX_EXPIRE_HOURS: int = 720  # 30 gün
+    # Kullanıcıya gösterilecek paylaşım adresinin ön eki.
+    SHARE_PUBLIC_BASE_URL: str = "http://localhost:5173/share"
+
+    # Export (AI sonucu → PDF/DOCX/XLSX/MD)
+    # Eager modda export Celery yerine inline (await) çalışır.
+    EXPORTS_EAGER: bool = True
+
+    # Dashboard
+    DASHBOARD_TREND_DAYS: int = 30
+    ACTIVITY_LOG_PAGE_SIZE: int = 50
 
     @property
     def cors_origins_list(self) -> list[str]:
