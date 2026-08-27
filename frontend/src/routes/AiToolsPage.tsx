@@ -6,6 +6,8 @@ import { Link, useParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card, Field } from "@/components/ui/card";
+import { CommentsCard } from "@/components/shared/CommentsCard";
+import { ExportMenu } from "@/components/shared/ExportMenu";
 import { Input } from "@/components/ui/input";
 import { aiToolsApi, jobResultText, quizQuestions } from "@/features/ai/tools-api";
 import { documentApi } from "@/features/documents/api";
@@ -369,6 +371,7 @@ export default function AiToolsPage() {
             </span>
           </div>
           <JobResult job={job} />
+          {job.status === "done" && <ExportMenu orgId={orgId} aiJobId={job.id} />}
         </Card>
       )}
 
@@ -398,6 +401,8 @@ export default function AiToolsPage() {
             ))}
         </ul>
       </Card>
+
+      <CommentsCard orgId={orgId} docId={docId} />
     </div>
   );
 }

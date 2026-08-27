@@ -196,21 +196,21 @@ docker-compose up
 **Hedef:** Kullanıcı deneyimi tamamlama, işbirliği özellikleri.
 
 ### Görevler
-- [ ] **Dashboard (M7):**
+- [x] **Dashboard (M7):**
   - Recharts grafikleri (kullanım trendi, AI işlem dağılımı)
   - Kota progress bar
   - Admin panel (platform yönetimi — superuser rolü)
-- [ ] **Paylaşım (M8):**
+- [x] **Paylaşım (M8):**
   - Veri modeli: `ShareLink` (token, expiry, permissions)
   - Shareable link oluşturma (public/email-specific)
   - Ekip içi doküman paylaşımı (rol bazlı izin)
   - History: işlem log'u (kim ne zaman ne yaptı)
-  - Yorum/not sistemi (M8 opsiyonel — zaman varsa)
-- [ ] **Export (M9):**
+  - Yorum/not sistemi (`DocumentComment`)
+- [x] **Export (M9):**
   - AI sonuçlarını PDF/DOCX/XLSX/MD olarak indir
   - Export API + arka plan işi (Celery)
-- [ ] Frontend: dashboard sayfası, paylaşım modal, export butonu
-- [ ] Test: share link erişim kontrolü, export format doğruluğu
+- [x] Frontend: dashboard sayfası, paylaşım modal, export butonu
+- [x] Test: share link erişim kontrolü, export format doğruluğu
 
 ### Teslim Kriteri
 - Kullanıcı dashboard'unda kullanımını görür.

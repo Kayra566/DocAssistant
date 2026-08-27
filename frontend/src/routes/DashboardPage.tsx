@@ -33,9 +33,16 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-3xl space-y-6 p-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">DocAssistant</h1>
-        <Button variant="ghost" onClick={handleLogout}>
-          Çıkış Yap
-        </Button>
+        <div className="flex items-center gap-3">
+          {currentUser?.is_superuser && (
+            <Link to="/admin" className="text-sm text-indigo-400 hover:underline">
+              Platform yönetimi
+            </Link>
+          )}
+          <Button variant="ghost" onClick={handleLogout}>
+            Çıkış Yap
+          </Button>
+        </div>
       </div>
 
       <Card className="space-y-2">
@@ -69,6 +76,12 @@ export default function DashboardPage() {
                   className="text-sm text-indigo-400 hover:underline"
                 >
                   Dokümanlar →
+                </Link>
+                <Link
+                  to={`/organizations/${org.id}/analytics`}
+                  className="text-sm text-indigo-400 hover:underline"
+                >
+                  Pano →
                 </Link>
                 <Link
                   to={`/organizations/${org.id}/team`}

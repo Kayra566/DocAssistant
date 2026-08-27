@@ -179,3 +179,126 @@ export interface BillingUsage {
   ai_tokens_used: number;
   ai_tokens_limit: number;
 }
+
+export type SharePermission = "view" | "download";
+
+export interface ShareLink {
+  id: string;
+  document_id: string;
+  permission: SharePermission;
+  email: string | null;
+  expires_at: string;
+  revoked: boolean;
+  view_count: number;
+  last_accessed_at: string | null;
+  created_at: string;
+}
+
+export interface ShareLinkCreated extends ShareLink {
+  token: string;
+  url: string;
+}
+
+export interface SharedDocument {
+  filename: string;
+  file_type: string;
+  size_bytes: number;
+  page_count: number;
+  permission: SharePermission;
+  can_download: boolean;
+  expires_at: string;
+  organization_name: string;
+}
+
+export interface DocumentComment {
+  id: string;
+  document_id: string;
+  page: number | null;
+  content: string;
+  author_email: string | null;
+  created_at: string;
+}
+
+export interface ActivityEntry {
+  id: string;
+  action: string;
+  resource_type: string;
+  resource_id: string | null;
+  meta: Record<string, unknown> | null;
+  actor_email: string | null;
+  created_at: string;
+}
+
+export type ExportFormat = "pdf" | "docx" | "xlsx" | "md";
+export type ExportStatus = "pending" | "running" | "done" | "failed";
+
+export interface ExportJob {
+  id: string;
+  ai_job_id: string;
+  format: ExportFormat;
+  status: ExportStatus;
+  filename: string;
+  size_bytes: number;
+  error: string | null;
+  created_at: string;
+}
+
+export interface TrendPoint {
+  date: string;
+  documents: number;
+  ai_jobs: number;
+}
+
+export interface DistributionItem {
+  key: string;
+  count: number;
+}
+
+export interface DashboardTotals {
+  documents: number;
+  ai_jobs: number;
+  share_links: number;
+  members: number;
+}
+
+export interface DashboardQuota {
+  documents_used: number;
+  documents_limit: number;
+  storage_bytes_used: number;
+  storage_bytes_limit: number;
+  ai_requests_used: number;
+  ai_requests_limit: number;
+  ai_tokens_used: number;
+  ai_tokens_limit: number;
+}
+
+export interface DashboardStats {
+  plan: Plan;
+  subscription_status: SubscriptionStatus;
+  totals: DashboardTotals;
+  quota: DashboardQuota;
+  usage_trend: TrendPoint[];
+  job_distribution: DistributionItem[];
+  document_status: DistributionItem[];
+}
+
+export interface PlatformStats {
+  users: number;
+  verified_users: number;
+  organizations: number;
+  documents: number;
+  ai_jobs: number;
+  share_links: number;
+  storage_bytes: number;
+  plan_distribution: DistributionItem[];
+}
+
+export interface PlatformOrganization {
+  id: string;
+  name: string;
+  slug: string;
+  plan: Plan;
+  documents: number;
+  members: number;
+  created_at: string;
+}

@@ -12,6 +12,15 @@ from app.models.billing import (
     UsageRecord,
     WebhookEvent,
 )
+from app.models.collab import (
+    ActivityLog,
+    DocumentComment,
+    ExportFormat,
+    ExportJob,
+    ExportStatus,
+    ShareLink,
+    SharePermission,
+)
 from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.enums import ROLE_LEVEL, Plan, Role
 from app.models.organization import Invitation, Membership, Organization
@@ -46,4 +55,11 @@ __all__ = [
     "UsageMetric",
     "UsageRecord",
     "WebhookEvent",
+    "ShareLink",
+    "SharePermission",
+    "ActivityLog",
+    "DocumentComment",
+    "ExportJob",
+    "ExportFormat",
+    "ExportStatus",
 ]

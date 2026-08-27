@@ -111,6 +111,20 @@ class Settings(BaseSettings):
     AI_TASK_CONTEXT_CHARS: int = 12000
     AI_QUIZ_MAX_QUESTIONS: int = 20
 
+    # Paylaşım bağlantıları
+    SHARE_LINK_DEFAULT_EXPIRE_HOURS: int = 168  # 7 gün
+    SHARE_LINK_MAX_EXPIRE_HOURS: int = 720  # 30 gün
+    # Kullanıcıya gösterilecek paylaşım adresinin ön eki.
+    SHARE_PUBLIC_BASE_URL: str = "http://localhost:5173/share"
+
+    # Export (AI sonucu → PDF/DOCX/XLSX/MD)
+    # Eager modda export Celery yerine inline (await) çalışır.
+    EXPORTS_EAGER: bool = True
+
+    # Dashboard
+    DASHBOARD_TREND_DAYS: int = 30
+    ACTIVITY_LOG_PAGE_SIZE: int = 50
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
