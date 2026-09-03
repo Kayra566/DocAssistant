@@ -12,6 +12,7 @@ from app.api.v1 import (
     documents,
     exports,
     gdpr,
+    models,
     notifications,
     organizations,
     shares,
@@ -34,6 +35,7 @@ router.include_router(exports.router)
 router.include_router(admin.router)
 router.include_router(notifications.router)
 router.include_router(gdpr.router)
+router.include_router(models.router)
 
 
 @router.get("/features", response_model=FeatureFlagsResponse, tags=["system"])

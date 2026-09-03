@@ -5,7 +5,7 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.embeddings import get_embedder
-from app.ai.provider import SYSTEM_PROMPT, get_provider
+from app.ai.provider import SYSTEM_PROMPT, get_active_provider
 from app.ai.vector_store import search_chunks
 from app.core.config import settings
 from app.models.document import DocumentChunk
@@ -50,5 +50,6 @@ def to_citations(scored: list[tuple[DocumentChunk, float]]) -> list[dict]:
     ]
 
 
-async def generate_answer(prompt: str) -> str:
-    return await get_provider().complete(system=SYSTEM_PROMPT, prompt=prompt)
+async def generate_answer(db: AsyncSession, prompt: str) -> str:
+    provider = await get_active_provider(db)
+    return await provider.complete(system=SYSTEM_PROMPT, prompt=prompt)

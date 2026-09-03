@@ -463,3 +463,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# AI model dosyalari (buyuk binary)
+models/*
+!models/README.md

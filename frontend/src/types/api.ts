@@ -327,3 +327,19 @@ export interface FeatureFlags {
   default_locale: string;
   sentry_enabled: boolean;
 }
+
+export interface ModelInfo {
+  id: string;
+  name: string;
+  source: "ollama" | "file" | "builtin";
+  ready: boolean;
+  size_bytes: number;
+  detail: string;
+}
+
+export interface ModelList {
+  models: ModelInfo[];
+  active_model_id: string;
+  models_dir: string;
+  ollama_available: boolean;
+}

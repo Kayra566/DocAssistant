@@ -95,6 +95,12 @@ class Settings(BaseSettings):
     LLM_TIMEOUT_SECONDS: int = 60
     RAG_TOP_K: int = 5
 
+    # Model dosyalarının bırakılacağı klasör (backend'in gördüğü yol).
+    MODELS_DIR: str = "./models"
+    # Aynı klasörün Ollama konteyneri içindeki yolu — içe aktarma bunu kullanır.
+    MODELS_MOUNT_PATH: str = "/models"
+    MODEL_IMPORT_TIMEOUT_SECONDS: int = 600
+
     # AI kotası (aylık token bütçesi, plan bazlı)
     QUOTA_FREE_AI_TOKENS: int = 100_000
     QUOTA_PRO_AI_TOKENS: int = 2_000_000

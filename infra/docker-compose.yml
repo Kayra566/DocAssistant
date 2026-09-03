@@ -61,6 +61,12 @@ services:
         condition: service_started
     volumes:
       - ../backend/app:/app/app
+      # Model dosyalarını buraya bırakın; Ollama aynı klasörü /models olarak görür.
+      - ../models:/models
+    environment:
+      MODELS_DIR: /models
+      MODELS_MOUNT_PATH: /models
+      OLLAMA_BASE_URL: http://ollama:11434
     command: >
       sh -c "alembic upgrade head &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
@@ -90,6 +96,7 @@ services:
       - "11434:11434"
     volumes:
       - ollama_models:/root/.ollama
+      - ../models:/models
     restart: unless-stopped
 
   frontend:
