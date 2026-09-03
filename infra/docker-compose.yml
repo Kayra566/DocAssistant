@@ -81,6 +81,17 @@ services:
       disable: true
     command: celery -A app.workers.celery_app worker --loglevel=info
 
+  # Yerel LLM. Varsayılan olarak başlamaz (birkaç GB model indirir):
+  #   docker compose --profile ai up -d
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ai"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+
   frontend:
     build:
       context: ../frontend
@@ -93,3 +104,4 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  ollama_models:
