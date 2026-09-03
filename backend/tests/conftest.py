@@ -49,6 +49,19 @@ def _reset_ai_singletons():
     provider_module._provider = None
 
 
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    """Rate limit sayacı testler arası sızmasın; e-posta sağlayıcısı konsola dönsun."""
+    from app.core.ratelimit import reset_backend
+    from app.notifications.email import reset_provider
+
+    reset_backend()
+    reset_provider()
+    yield
+    reset_backend()
+    reset_provider()
+
+
 @pytest.fixture
 async def client():
     async def _override_get_db():

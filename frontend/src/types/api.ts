@@ -302,3 +302,28 @@ export interface PlatformOrganization {
   members: number;
   created_at: string;
 }
+
+export type NotificationType =
+  | "welcome"
+  | "invite"
+  | "quota"
+  | "billing"
+  | "document"
+  | "system";
+
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  link: string | null;
+  read: boolean;
+  created_at: string;
+}
+
+export interface FeatureFlags {
+  flags: string[];
+  environment: string;
+  default_locale: string;
+  sentry_enabled: boolean;
+}

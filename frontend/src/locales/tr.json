@@ -1,0 +1,101 @@
+{
+  "common": {
+    "backToDashboard": "← Panele dön",
+    "loading": "Yükleniyor…",
+    "cancel": "Vazgeç",
+    "close": "Kapat",
+    "save": "Kaydet",
+    "language": "Dil"
+  },
+  "nav": {
+    "documents": "Dokümanlar",
+    "dashboard": "Pano",
+    "team": "Ekip",
+    "billing": "Plan",
+    "admin": "Platform yönetimi",
+    "logout": "Çıkış Yap",
+    "notifications": "Bildirimler",
+    "privacy": "Gizlilik",
+    "terms": "Kullanım Koşulları"
+  },
+  "landing": {
+    "badge": "Dokümanlarınız için AI asistan",
+    "title": "Dokümanlarınızla konuşun, saniyeler içinde cevap alın",
+    "subtitle": "PDF, Word, Excel ve sunumlarınızı yükleyin; sayfa referanslı yanıtlar, özetler, quizler ve çeviriler üretin.",
+    "ctaPrimary": "Ücretsiz başlayın",
+    "ctaSecondary": "Giriş yapın",
+    "features": {
+      "chatTitle": "Sayfa referanslı sohbet",
+      "chatBody": "Her yanıt kaynağını gösterir; hangi sayfadan geldiğini tek tıkla doğrularsınız.",
+      "toolsTitle": "Yedi AI aracı",
+      "toolsBody": "Özet, kritik bilgi, quiz, çeviri, veri çıkarma ve doküman karşılaştırma.",
+      "teamTitle": "Ekip ve paylaşım",
+      "teamBody": "Rol bazlı erişim, süreli paylaşım bağlantıları ve işlem geçmişi."
+    },
+    "securityTitle": "Güvenlik önce gelir",
+    "securityBody": "Kiracı bazlı veri izolasyonu, şifreli 2FA sırları, değişmez denetim kaydı ve GDPR uyumlu veri dışa aktarma."
+  },
+  "onboarding": {
+    "title": "Başlangıç adımları",
+    "dismiss": "Gizle",
+    "step1": "İlk dokümanınızı yükleyin",
+    "step1Body": "PDF, DOCX, XLSX, PPTX, TXT veya MD dosyası sürükleyip bırakın.",
+    "step2": "Dokümanla sohbet edin",
+    "step2Body": "Soru sorun; yanıtın hangi sayfadan geldiğini görün.",
+    "step3": "AI araçlarını deneyin",
+    "step3Body": "Özet çıkarın, quiz üretin veya sonucu PDF olarak indirin.",
+    "done": "Tamamlandı"
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "empty": "Bildiriminiz yok.",
+    "markAllRead": "Tümünü okundu işaretle",
+    "unreadLabel": "{{count}} okunmamış bildirim"
+  },
+  "cookies": {
+    "message": "Deneyimi iyileştirmek için yalnızca zorunlu çerezleri kullanıyoruz. Analitik çerezler için onayınızı isteriz.",
+    "accept": "Tümünü kabul et",
+    "reject": "Yalnızca zorunlu",
+    "policy": "Çerez politikası"
+  },
+  "privacy": {
+    "title": "Gizlilik Politikası",
+    "updated": "Son güncelleme: 27.08.2026",
+    "controllerTitle": "Veri sorumlusu",
+    "controllerBody": "DocAssistant, hizmeti sunmak için hesap bilgilerinizi ve yüklediğiniz dokümanları işler.",
+    "dataTitle": "İşlenen veriler",
+    "dataBody": "E-posta, ad, organizasyon bilgisi, yüklenen dokümanlar ve bunlardan üretilen AI çıktıları.",
+    "rightsTitle": "Haklarınız",
+    "rightsBody": "Verilerinizi dilediğiniz zaman JSON olarak indirebilir, hesabınızı ve tüm verilerinizi kalıcı olarak silebilirsiniz.",
+    "retentionTitle": "Saklama",
+    "retentionBody": "Hesabınızı sildiğinizde dokümanlarınız ve türetilen çıktılar depolamadan da kaldırılır.",
+    "contactTitle": "İletişim",
+    "contactBody": "Gizlilikle ilgili talepleriniz için privacy@docassistant.local adresine yazabilirsiniz."
+  },
+  "terms": {
+    "title": "Kullanım Koşulları",
+    "updated": "Son güncelleme: 27.08.2026",
+    "serviceTitle": "Hizmet",
+    "serviceBody": "DocAssistant, doküman analizi için AI destekli bir SaaS hizmetidir. Hizmet olduğu gibi sunulur.",
+    "accountTitle": "Hesap sorumluluğu",
+    "accountBody": "Hesap güvenliğinizden siz sorumlusunuz. Şüpheli erişim durumunda parolanızı değiştirin ve 2FA'yı etkinleştirin.",
+    "contentTitle": "İçerik",
+    "contentBody": "Yüklediğiniz dokümanların haklarına sahip olduğunuzu beyan edersiniz. Yasa dışı içerik yüklenemez.",
+    "billingTitle": "Ödeme",
+    "billingBody": "Abonelikler aylık yenilenir. İptal ettiğinizde plan dönem sonunda Free'ye düşer.",
+    "liabilityTitle": "Sorumluluk sınırı",
+    "liabilityBody": "AI çıktıları hata içerebilir; kritik kararlar için kaynak dokümanı doğrulayın."
+  },
+  "account": {
+    "title": "Veri ve gizlilik",
+    "exportTitle": "Verilerimi indir",
+    "exportBody": "Hesabınıza ait tüm veriyi JSON formatında indirin.",
+    "exportAction": "JSON indir",
+    "deleteTitle": "Hesabımı sil",
+    "deleteBody": "Hesabınız ve yalnızca sizin sahibi olduğunuz organizasyonlar kalıcı olarak silinir. Bu işlem geri alınamaz.",
+    "deleteAction": "Hesabı kalıcı olarak sil",
+    "passwordLabel": "Parolanızı girin",
+    "confirmLabel": "Bu işlemin geri alınamayacağını anlıyorum",
+    "deleteConfirm": "Silmeyi onayla"
+  }
+}

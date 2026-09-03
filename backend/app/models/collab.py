@@ -66,7 +66,10 @@ class ShareLink(BaseModel):
 
 
 class ActivityLog(BaseModel):
-    """Kim, ne zaman, ne yaptı — organizasyon bazlı işlem geçmişi."""
+    """Kim, ne zaman, ne yaptı — organizasyon bazlı işlem geçmişi.
+
+    Kayıtlar append-only'dir ve HMAC zinciriyle imzalanır (bkz. app.core.audit).
+    """
 
     __tablename__ = "activity_logs"
 
@@ -81,6 +84,8 @@ class ActivityLog(BaseModel):
     resource_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, nullable=True)
     # Serbest biçimli ek bilgi (ör. {"filename": "rapor.pdf"}).
     meta: Mapped[dict | None] = mapped_column("meta", JSON, nullable=True)
+    signature: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    prev_signature: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
 
 class DocumentComment(BaseModel):

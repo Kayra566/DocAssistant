@@ -125,9 +125,56 @@ class Settings(BaseSettings):
     DASHBOARD_TREND_DAYS: int = 30
     ACTIVITY_LOG_PAGE_SIZE: int = 50
 
+    # ---------- Faz 7: güvenlik ----------
+    # Hassas alanların AES-256-GCM ile şifrelenmesi. Boşsa JWT_SECRET'ten türetilir.
+    ENCRYPTION_KEY: str = ""
+    SECURITY_HEADERS_ENABLED: bool = True
+    HSTS_MAX_AGE: int = 31_536_000
+    CSP_POLICY: str = (
+        "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
+        "script-src 'self'; connect-src 'self'; frame-ancestors 'none'; "
+        "base-uri 'self'; form-action 'self'"
+    )
+    # Audit log kayıtları HMAC zinciriyle imzalanır (değişmezlik kanıtı).
+    AUDIT_LOG_SIGNING_ENABLED: bool = True
+
+    # Rate limiting
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_BACKEND: Literal["memory", "redis"] = "memory"
+    RATE_LIMIT_REQUESTS: int = 300
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+    # Kimlik doğrulama uçları için daha sıkı limit (credential stuffing'e karşı).
+    RATE_LIMIT_AUTH_REQUESTS: int = 10
+    RATE_LIMIT_AUTH_WINDOW_SECONDS: int = 60
+
+    # Log'larda kişisel veri maskeleme
+    LOG_PII_MASKING: bool = True
+
+    # ---------- Faz 7: bildirimler ----------
+    EMAIL_PROVIDER: Literal["console", "resend", "sendgrid"] = "console"
+    EMAIL_FROM: str = "DocAssistant <no-reply@docassistant.local>"
+    EMAIL_API_KEY: str = ""
+    EMAIL_TIMEOUT_SECONDS: int = 10
+    FRONTEND_BASE_URL: str = "http://localhost:5173"
+
+    # ---------- Faz 7: gözlemlenebilirlik ----------
+    # DSN boşsa Sentry devre dışı kalır.
+    SENTRY_DSN: str = ""
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.1
+    METRICS_ENABLED: bool = True
+
+    # ---------- Faz 7: i18n & feature flags ----------
+    DEFAULT_LOCALE: Literal["tr", "en"] = "tr"
+    # Virgülle ayrılmış aktif flag listesi (ör. "onboarding,landing").
+    FEATURE_FLAGS: str = "onboarding"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+
+    @property
+    def feature_flag_set(self) -> set[str]:
+        return {f.strip() for f in self.FEATURE_FLAGS.split(",") if f.strip()}
 
 
 @lru_cache

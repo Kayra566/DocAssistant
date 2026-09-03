@@ -17,6 +17,7 @@ MB = 1024 * 1024
 class QuotaExceededError(AppError):
     status_code = 402
     message = "Plan kotası aşıldı."
+    code = "error.quota"
 
 
 def document_limit(plan: Plan) -> int:

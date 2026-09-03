@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.crypto import EncryptedString
 from app.models.base import BaseModel
 
 
@@ -18,8 +19,10 @@ class User(BaseModel):
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    # 2FA (TOTP) — Pro plan
-    totp_secret: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # 2FA (TOTP) — Pro plan. Değer diskte AES-256-GCM ile şifreli tutulur.
+    totp_secret: Mapped[str | None] = mapped_column(
+        EncryptedString(255), nullable=True
+    )
     totp_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Account lockout

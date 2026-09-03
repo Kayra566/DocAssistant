@@ -1,0 +1,7 @@
+# Shell scriptleri Linux'ta çalışır; CRLF ile shebang bozulur.
+*.sh text eol=lf
+
+# Dockerfile ve compose dosyaları da Linux hedefli.
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

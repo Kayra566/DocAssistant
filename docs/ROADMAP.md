@@ -226,76 +226,74 @@ docker-compose up
 ### Görevler
 
 #### Güvenlik (M10)
-- [ ] Güvenlik denetimi:
-  - OWASP ZAP taraması
-  - Bandit (Python), npm audit (Node.js)
-- [ ] GDPR uyumluluk:
-  - Veri export API (kullanıcı tüm verisini indirebilir)
-  - Right to be forgotten (hesap + tüm verilerini sil)
+- [x] Güvenlik denetimi:
+  - Bandit (Python), npm audit (Node.js) — CI'da ayrı job
+  - [ ] OWASP ZAP taraması — çalışan staging URL'i gerektirir
+- [x] GDPR uyumluluğu:
+  - Veri export API (`GET /api/v1/gdpr/export`)
+  - Right to be forgotten (`POST /api/v1/gdpr/delete-account`)
   - Privacy policy, ToS, Cookie consent sayfaları
-- [ ] Audit log değişmezliği (append-only, imza)
-- [ ] Encryption at rest (AES-256 — hassas alanlar)
-- [ ] Rate limiting fine-tuning
-- [ ] PII maskeleme (log'larda kişisel veri yok)
+- [x] Audit log değişmezliği (HMAC hash zinciri + Postgres append-only trigger)
+- [x] Encryption at rest (AES-256-GCM — TOTP sırları)
+- [x] Rate limiting (IP/kullanıcı bazlı, auth uçları için sıkı limit, redis backend)
+- [x] PII maskeleme (log filtresi: e-posta, token, JWT, kart)
+- [x] Güvenlik başlıkları (CSP, HSTS, X-Frame-Options, Referrer-Policy)
 
 #### Bildirimler (M11)
-- [ ] Email provider seçimi (Resend veya SendGrid)
-- [ ] Transactional email şablonları:
-  - Email verification, password reset, invoice, ekip daveti
-- [ ] SPF/DKIM/DMARC domain authentication
-- [ ] In-app notification sistemi (basit — navbar badge)
-- [ ] Test: email deliverability (staging'de gerçek mail gönder)
+- [x] Email provider soyutlaması (console / Resend / SendGrid)
+- [x] Transactional email şablonları:
+  - Email verification, password reset, ekip daveti, ödeme hatası, kota uyarısı
+- [x] SPF/DKIM/DMARC domain authentication — DNS adımları DEPLOYMENT.md'de
+- [x] In-app notification sistemi (navbar rozeti + okundu işaretleme)
+- [ ] Test: email deliverability — gerçek domain ve sağlayıcı hesabı gerektirir
 
 #### DevOps & Gözlem (M12)
-- [ ] Multi-stage Docker build (prod image'ı optimize)
-- [ ] CI/CD pipeline tamamla:
-  - Test coverage raporu (80%+ hedef)
-  - Security scan + fail on high severity
-  - Image registry push
-  - Staging deploy (otomatik)
-  - Production deploy (manuel onay)
-- [ ] Sentry kurulumu (backend + frontend)
-- [ ] PostHog kurulumu (product analytics)
-- [ ] Prometheus/Grafana metrikleri (API latency, DB pool, cache hit rate)
-- [ ] Health check endpoint (`/health`, `/ready`)
-- [ ] Yedekleme stratejisi:
-  - Postgres: pg_dump günlük, S3'e yükle
-  - pgvector: aynı Postgres backup'ına dahil
-  - Object storage: versioning açık
-  - Backup restore testi (staging'de)
-- [ ] Secrets vault (AWS Secrets Manager / HashiCorp Vault)
-- [ ] Staging ortamı setup
-- [ ] Feature flags (LaunchDarkly / custom)
+- [x] Multi-stage Docker build (runtime-only bağımlılık, non-root user, healthcheck)
+- [x] CI/CD pipeline:
+  - Test coverage raporu (artifact olarak yüklenir)
+  - Security scan (bandit + npm audit), yüksek şiddette fail
+  - E2E job (Playwright)
+  - [ ] Image registry push + staging/production deploy — registry ve ortam kimlik bilgisi gerektirir
+- [x] Sentry kurulumu (backend + frontend, DSN yoksa devre dışı)
+- [x] PostHog kurulumu (yalnızca çerez onayı verildiyse başlar)
+- [x] Prometheus metrikleri (`/metrics`: istek sayısı, latency, DB pool)
+- [x] Health check endpoint (`/health` liveness, `/api/v1/ready` DB+Redis)
+- [x] Yedekleme stratejisi:
+  - `infra/scripts/backup.sh` (pg_dump + S3 + retention)
+  - `infra/scripts/restore.sh` (doğrulamalı geri yükleme)
+  - [ ] Backup restore testi — staging Postgres örneği gerektirir
+- [ ] Secrets vault (AWS Secrets Manager / Vault) — akış DEPLOYMENT.md'de, bağlanması bulut hesabı gerektirir
+- [x] Staging ortamı setup (`infra/docker-compose.staging.yml`)
+- [x] Feature flags (config tabanlı, `GET /api/v1/features`)
 
 #### Dokümantasyon & Onboarding (M13)
-- [ ] Swagger/OpenAPI tamamlama (tüm endpoint'ler açıklamalı)
-- [ ] Mimari diyagramlar güncelle (Mermaid — deployment, sequence)
-- [ ] README: katkı rehberi, kod stili, PR süreci
-- [ ] DEPLOYMENT.md (production kurulum adımları)
-- [ ] TROUBLESHOOTING.md (sık sorunlar)
-- [ ] `.env.example` — tüm değişkenler açıklamalı
-- [ ] i18n (TR/EN):
-  - Backend: hata mesajları + email şablonları
-  - Frontend: react-i18next + çeviri dosyaları
-- [ ] Onboarding flow (ilk giriş: walkthrough, örnek doküman yükle)
-- [ ] Landing page (pazarlama sayfası)
-- [ ] Erişilebilirlik (a11y): klavye navigasyonu + ARIA + contrast
+- [x] Swagger/OpenAPI tamamlama (açıklama + tag metadata)
+- [x] README: kurulum ve katkı rehberi
+- [x] DEPLOYMENT.md (production kurulum adımları)
+- [x] TROUBLESHOOTING.md (sık sorunlar)
+- [x] `.env.example` — tüm değişkenler açıklamalı (backend + frontend)
+- [x] i18n (TR/EN):
+  - Backend: hata mesajları (Accept-Language) + email şablonları
+  - Frontend: react-i18next + dil seçici
+- [x] Onboarding flow (ilk giriş kontrol listesi, feature-flag'li)
+- [x] Landing page (pazarlama sayfası)
+- [x] Erişilebilirlik (a11y): ARIA etiketleri, klavye odağı, focus-visible halkaları
+- [ ] Mimari diyagramları güncelle (deployment, sequence)
 
 #### Test & Yük
-- [ ] E2E test coverage: kritik kullanıcı yolları (Playwright)
-- [ ] Yük testi (k6 / Locust):
-  - Doküman yükleme (100 eşzamanlı)
-  - AI chat (50 eşzamanlı)
-  - Vektör arama performansı
-- [ ] Sonuçlara göre optimizasyon (DB index, cache, query tuning)
+- [x] E2E test coverage: kritik kullanıcı yolları (Playwright)
+- [x] Yük testi scriptleri (k6):
+  - Doküman yükleme (100 eşzamanlı) — `infra/loadtest/upload.js`
+  - AI chat (50 eşzamanlı) + vektör arama — `infra/loadtest/chat.js`
+- [ ] Sonuçlara göre optimizasyon — yük testi production benzeri ortamda koştuktan sonra
 
 ### Teslim Kriteri
-- Staging'de production benzeri ortamda tüm akışlar test edilmiş.
-- Güvenlik taraması temiz (kritik zafiyet yok).
-- Dokümantasyon eksiksiz.
-- Yedekleme ve restore test edilmiş.
-- Yük testi hedefleri karşılanmış.
-- Production deployment checklist hazır.
+- [x] Güvenlik taraması temiz (bandit + npm audit CI'da, kritik bulgu yok).
+- [x] Dokümantasyon eksiksiz (DEPLOYMENT, TROUBLESHOOTING, .env.example, OpenAPI).
+- [x] Yedekleme ve geri yükleme scriptleri hazır.
+- [x] Yük testi senaryoları hazır.
+- [x] Production deployment checklist hazır (DEPLOYMENT.md §12).
+- [ ] Staging'de production benzeri ortamda tüm akışlar test edilmiş — gerçek staging altyapısı gerektirir.
 
 ---
 
