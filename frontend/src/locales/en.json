@@ -1,0 +1,101 @@
+{
+  "common": {
+    "backToDashboard": "← Back to dashboard",
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "language": "Language"
+  },
+  "nav": {
+    "documents": "Documents",
+    "dashboard": "Dashboard",
+    "team": "Team",
+    "billing": "Plan",
+    "admin": "Platform admin",
+    "logout": "Log out",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "landing": {
+    "badge": "AI assistant for your documents",
+    "title": "Talk to your documents, get answers in seconds",
+    "subtitle": "Upload PDFs, Word, Excel and slide decks; get page-referenced answers, summaries, quizzes and translations.",
+    "ctaPrimary": "Start for free",
+    "ctaSecondary": "Sign in",
+    "features": {
+      "chatTitle": "Page-referenced chat",
+      "chatBody": "Every answer cites its source so you can verify the exact page in one click.",
+      "toolsTitle": "Seven AI tools",
+      "toolsBody": "Summary, key points, quiz, translation, data extraction and document comparison.",
+      "teamTitle": "Teams and sharing",
+      "teamBody": "Role-based access, expiring share links and a full activity history."
+    },
+    "securityTitle": "Security first",
+    "securityBody": "Tenant-level isolation, encrypted 2FA secrets, tamper-evident audit logs and GDPR-compliant data export."
+  },
+  "onboarding": {
+    "title": "Getting started",
+    "dismiss": "Dismiss",
+    "step1": "Upload your first document",
+    "step1Body": "Drag and drop a PDF, DOCX, XLSX, PPTX, TXT or MD file.",
+    "step2": "Chat with the document",
+    "step2Body": "Ask a question and see which page the answer came from.",
+    "step3": "Try the AI tools",
+    "step3Body": "Generate a summary or quiz, then export the result as PDF.",
+    "done": "Done"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "You have no notifications.",
+    "markAllRead": "Mark all as read",
+    "unreadLabel": "{{count}} unread notifications"
+  },
+  "cookies": {
+    "message": "We only use essential cookies to run the service. Analytics cookies require your consent.",
+    "accept": "Accept all",
+    "reject": "Essential only",
+    "policy": "Cookie policy"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "updated": "Last updated: 2026-08-27",
+    "controllerTitle": "Data controller",
+    "controllerBody": "DocAssistant processes your account details and uploaded documents to provide the service.",
+    "dataTitle": "Data we process",
+    "dataBody": "Email, name, organization details, uploaded documents and the AI output derived from them.",
+    "rightsTitle": "Your rights",
+    "rightsBody": "You can download all of your data as JSON at any time and permanently delete your account and data.",
+    "retentionTitle": "Retention",
+    "retentionBody": "When you delete your account, your documents and derived output are removed from storage as well.",
+    "contactTitle": "Contact",
+    "contactBody": "For privacy requests write to privacy@docassistant.local."
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "updated": "Last updated: 2026-08-27",
+    "serviceTitle": "The service",
+    "serviceBody": "DocAssistant is an AI-powered SaaS for document analysis, provided as is.",
+    "accountTitle": "Account responsibility",
+    "accountBody": "You are responsible for your account security. Change your password and enable 2FA if you suspect access.",
+    "contentTitle": "Content",
+    "contentBody": "You confirm you hold the rights to documents you upload. Illegal content may not be uploaded.",
+    "billingTitle": "Billing",
+    "billingBody": "Subscriptions renew monthly. On cancellation the plan falls back to Free at the end of the period.",
+    "liabilityTitle": "Limitation of liability",
+    "liabilityBody": "AI output can contain errors; verify the source document before making critical decisions."
+  },
+  "account": {
+    "title": "Data and privacy",
+    "exportTitle": "Download my data",
+    "exportBody": "Export everything associated with your account as JSON.",
+    "exportAction": "Download JSON",
+    "deleteTitle": "Delete my account",
+    "deleteBody": "Your account and any organization you solely own will be permanently deleted. This cannot be undone.",
+    "deleteAction": "Permanently delete account",
+    "passwordLabel": "Enter your password",
+    "confirmLabel": "I understand this cannot be undone",
+    "deleteConfirm": "Confirm deletion"
+  }
+}

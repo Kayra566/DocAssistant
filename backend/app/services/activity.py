@@ -6,7 +6,9 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import audit
 from app.core.config import settings
+from app.core.time import utcnow
 from app.models.collab import ActivityLog
 from app.models.user import User
 
@@ -33,7 +35,11 @@ async def log(
     meta: dict[str, Any] | None = None,
 ) -> ActivityLog:
     """Kaydı ekler ve commit eder. Ana işlemi bozmaması için çağıran tarafta izole edilir."""
+    # id ve created_at imzalamadan önce sabitlenir; aksi halde flush sırasında
+    # atanan değerler imzayla uyuşmaz ve zincir doğrulaması başarısız olur.
     entry = ActivityLog(
+        id=uuid.uuid4(),
+        created_at=utcnow(),
         organization_id=org_id,
         user_id=user_id,
         action=action,
@@ -41,6 +47,10 @@ async def log(
         resource_id=resource_id,
         meta=meta,
     )
+    if settings.AUDIT_LOG_SIGNING_ENABLED:
+        previous = await audit.latest_signature(db, org_id)
+        entry.prev_signature = previous
+        entry.signature = audit.sign(entry, previous)
     db.add(entry)
     await db.commit()
     await db.refresh(entry)

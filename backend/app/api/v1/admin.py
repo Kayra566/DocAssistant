@@ -1,10 +1,14 @@
+import uuid
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_superuser
+from app.core import audit
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.dashboard import PlatformOrganizationResponse, PlatformStatsResponse
+from app.schemas.system import AuditVerifyResponse
 from app.services import dashboard as dashboard_service
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -27,3 +31,13 @@ async def platform_organizations(
 ):
     rows = await dashboard_service.platform_organizations(db, limit=limit, offset=offset)
     return [PlatformOrganizationResponse(**row) for row in rows]
+
+
+@router.get("/audit/{org_id}/verify", response_model=AuditVerifyResponse)
+async def verify_audit_chain(
+    org_id: uuid.UUID,
+    user: User = Depends(require_superuser),
+    db: AsyncSession = Depends(get_db),
+):
+    """Audit log imza zincirini doğrular; bozulma varsa ilk kaydı raporlar."""
+    return AuditVerifyResponse(**await audit.verify_chain(db, org_id))

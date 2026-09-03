@@ -23,6 +23,7 @@ from app.models.collab import (
 )
 from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.enums import ROLE_LEVEL, Plan, Role
+from app.models.notification import Notification, NotificationType
 from app.models.organization import Invitation, Membership, Organization
 from app.models.user import (
     EmailVerificationToken,
@@ -62,4 +63,6 @@ __all__ = [
     "ExportJob",
     "ExportFormat",
     "ExportStatus",
+    "Notification",
+    "NotificationType",
 ]

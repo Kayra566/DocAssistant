@@ -1,0 +1,10 @@
+# Bandit yapılandırması — statik güvenlik taraması.
+exclude_dirs:
+  - tests
+  - alembic
+
+# B101 (assert): testlerde kullanılır, uygulama kodu taranırken gürültü yaratır.
+# B104 (0.0.0.0 bind): konteyner içinde kasıtlıdır, ağ erişimi compose/ingress ile sınırlanır.
+skips:
+  - B101
+  - B104

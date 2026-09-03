@@ -1,10 +1,14 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.i18n import normalize_locale, translate
+from app.models.notification import NotificationType
 from app.models.user import User
+from app.notifications import templates
+from app.notifications.email import send as send_email
 from app.schemas.auth import (
     Enable2FAResponse,
     ForgotPasswordRequest,
@@ -20,6 +24,7 @@ from app.schemas.auth import (
     VerifyEmailRequest,
 )
 from app.services import auth as auth_service
+from app.services import notifications as notification_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -29,13 +34,28 @@ def _dev(token: str | None) -> str | None:
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=201)
-async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db)):
+async def register(
+    payload: RegisterRequest,
+    accept_language: str | None = Header(default=None),
+    db: AsyncSession = Depends(get_db),
+):
     user, org, raw = await auth_service.register(
         db,
         email=payload.email,
         password=payload.password,
         full_name=payload.full_name,
         organization_name=payload.organization_name,
+    )
+    locale = normalize_locale(accept_language)
+    send_email(templates.verification_email(user.email, raw, locale))
+    await notification_service.create(
+        db,
+        user_id=user.id,
+        org_id=org.id,
+        type=NotificationType.WELCOME,
+        title=translate("notification.welcome.title", locale),
+        body=translate("notification.welcome.body", locale),
+        link=f"/organizations/{org.id}/documents",
     )
     return RegisterResponse(
         user=UserResponse.model_validate(user),
@@ -75,9 +95,17 @@ async def logout(payload: RefreshRequest, db: AsyncSession = Depends(get_db)):
 
 @router.post("/forgot-password", response_model=MessageResponse)
 async def forgot_password(
-    payload: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)
+    payload: ForgotPasswordRequest,
+    accept_language: str | None = Header(default=None),
+    db: AsyncSession = Depends(get_db),
 ):
     raw = await auth_service.forgot_password(db, payload.email)
+    if raw:
+        send_email(
+            templates.password_reset_email(
+                payload.email, raw, normalize_locale(accept_language)
+            )
+        )
     # Bilgi sızdırmamak için her durumda aynı mesaj.
     return MessageResponse(
         message="Eğer bu email kayıtlıysa sıfırlama bağlantısı gönderildi.",

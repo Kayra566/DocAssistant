@@ -16,19 +16,19 @@ async def get_current_user(
     db: AsyncSession = Depends(get_db),
 ) -> User:
     if not authorization or not authorization.lower().startswith("bearer "):
-        raise AuthError("Yetkilendirme başlığı eksik.")
+        raise AuthError(code="error.auth.missing_header")
     token = authorization.split(" ", 1)[1].strip()
     try:
         payload = security.decode_token(token)
     except Exception as exc:  # jwt errors
-        raise AuthError("Token geçersiz veya süresi dolmuş.") from exc
+        raise AuthError(code="error.auth.invalid_token") from exc
 
     if payload.get("type") != "access":
-        raise AuthError("Geçersiz token türü.")
+        raise AuthError(code="error.auth.invalid_token")
 
     user = await db.get(User, uuid.UUID(payload["sub"]))
     if not user or not user.is_active:
-        raise AuthError("Kullanıcı bulunamadı veya pasif.")
+        raise AuthError(code="error.auth.inactive_user")
     return user
 
 
@@ -45,9 +45,9 @@ def require_role(minimum: Role):
     ) -> User:
         m = await get_membership(db, user.id, org_id)
         if not m:
-            raise PermissionError("Bu organizasyona üye değilsiniz.")
+            raise PermissionError(code="error.permission.not_member")
         if ROLE_LEVEL[m.role] < ROLE_LEVEL[minimum]:
-            raise PermissionError("Bu işlem için yetkiniz yok.")
+            raise PermissionError(code="error.permission")
         return user
 
     return _dep
@@ -56,5 +56,5 @@ def require_role(minimum: Role):
 async def require_superuser(user: User = Depends(get_current_user)) -> User:
     """Platform yönetimi uçları yalnızca superuser'a açıktır."""
     if not user.is_superuser:
-        raise PermissionError("Bu işlem için platform yöneticisi olmalısınız.")
+        raise PermissionError(code="error.permission.superuser_required")
     return user

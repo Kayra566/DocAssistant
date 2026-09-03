@@ -17,7 +17,10 @@ def _hashing_embed(text: str, dim: int) -> list[float]:
     """
     vec = [0.0] * dim
     for tok in _word_re.findall(text.lower()):
-        h = int(hashlib.md5(tok.encode("utf-8")).hexdigest(), 16)
+        # Kriptografik amaç yok: yalnızca kelimeyi deterministik bir kovaya eşler.
+        h = int(
+            hashlib.md5(tok.encode("utf-8"), usedforsecurity=False).hexdigest(), 16
+        )
         idx = h % dim
         sign = 1.0 if (h // dim) % 2 == 0 else -1.0
         vec[idx] += sign

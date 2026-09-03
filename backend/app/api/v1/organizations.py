@@ -1,12 +1,16 @@
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.i18n import normalize_locale
+from app.models.organization import Organization
 from app.models.user import User
+from app.notifications import templates
+from app.notifications.email import send as send_email
 from app.schemas.auth import MessageResponse
 from app.schemas.organization import (
     AcceptInviteRequest,
@@ -71,11 +75,21 @@ async def list_members(
 async def invite_member(
     org_id: uuid.UUID,
     payload: InviteRequest,
+    accept_language: str | None = Header(default=None),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     invite, raw = await org_service.invite_member(
         db, user, org_id, payload.email, payload.role
+    )
+    org = await db.get(Organization, org_id)
+    send_email(
+        templates.invitation_email(
+            invite.email,
+            raw,
+            org.name if org else "DocAssistant",
+            normalize_locale(accept_language),
+        )
     )
     return InviteResponse(
         id=invite.id,
