@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "react-router-dom";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { aiApi } from "@/features/ai/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import type { Citation } from "@/types/api";
 
 interface UiMessage {
@@ -39,8 +39,8 @@ export default function ChatPage() {
   });
 
   const errorMsg =
-    chatMutation.error instanceof AxiosError
-      ? (chatMutation.error.response?.data?.detail ?? "Bir hata oluştu.")
+    chatMutation.error
+      ? getApiErrorMessage(chatMutation.error, "Bir hata oluştu.")
       : null;
 
   function send() {

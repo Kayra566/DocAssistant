@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, Field } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { authApi } from "@/features/auth/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { type ResetInput, resetSchema } from "@/lib/validators";
 
 export default function ResetPasswordPage() {
@@ -29,8 +29,8 @@ export default function ResetPasswordPage() {
   });
 
   const errorMsg =
-    mutation.error instanceof AxiosError
-      ? (mutation.error.response?.data?.detail ?? "Sıfırlama başarısız.")
+    mutation.error
+      ? getApiErrorMessage(mutation.error, "Sıfırlama başarısız.")
       : null;
 
   return (

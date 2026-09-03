@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
@@ -9,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, Field } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { authApi } from "@/features/auth/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { type RegisterInput, registerSchema } from "@/lib/validators";
 
 export default function RegisterPage() {
@@ -25,8 +25,8 @@ export default function RegisterPage() {
   });
 
   const errorMsg =
-    mutation.error instanceof AxiosError
-      ? (mutation.error.response?.data?.detail ?? "Kayıt başarısız.")
+    mutation.error
+      ? getApiErrorMessage(mutation.error, "Kayıt başarısız.")
       : null;
 
   return (

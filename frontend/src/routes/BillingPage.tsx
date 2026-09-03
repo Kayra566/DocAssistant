@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { Link, useParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { billingApi, formatPrice, usagePercent } from "@/features/billing/api";
 import { formatBytes } from "@/features/documents/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import type { Plan } from "@/types/api";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -75,9 +75,7 @@ export default function BillingPage() {
 
   const error = [checkoutMutation.error, portalMutation.error].find(Boolean);
   const errorMsg =
-    error instanceof AxiosError
-      ? (error.response?.data?.detail ?? "Bir hata oluştu.")
-      : null;
+    error ? getApiErrorMessage(error, "Bir hata oluştu.") : null;
 
   const usage = usageQuery.data;
 

@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EXPORT_FORMATS, exportApi } from "@/features/exports/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import type { ExportFormat } from "@/types/api";
 
 export function ExportMenu({
@@ -25,9 +25,9 @@ export function ExportMenu({
   });
 
   const errorMsg =
-    mutation.error instanceof AxiosError
-      ? (mutation.error.response?.data?.detail ?? "Dışa aktarma başarısız.")
-      : (mutation.error?.message ?? null);
+    mutation.error
+      ? getApiErrorMessage(mutation.error, "Dışa aktarma başarısız.")
+      : null;
 
   return (
     <div className="space-y-1">

@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, Field } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { gdprApi } from "@/features/system/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { useAuthStore } from "@/stores/authStore";
 
 export default function AccountPage() {
@@ -29,8 +29,8 @@ export default function AccountPage() {
   });
 
   const errorMsg =
-    deleteMutation.error instanceof AxiosError
-      ? (deleteMutation.error.response?.data?.detail ?? "İşlem başarısız.")
+    deleteMutation.error
+      ? getApiErrorMessage(deleteMutation.error, "İşlem başarısız.")
       : null;
 
   return (

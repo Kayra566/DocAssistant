@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "react-router-dom";
@@ -11,6 +10,7 @@ import { ExportMenu } from "@/components/shared/ExportMenu";
 import { Input } from "@/components/ui/input";
 import { aiToolsApi, jobResultText, quizQuestions } from "@/features/ai/tools-api";
 import { documentApi } from "@/features/documents/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import type {
   AIJob,
   AIJobType,
@@ -216,8 +216,8 @@ export default function AiToolsPage() {
   });
 
   const errorMsg =
-    runMutation.error instanceof AxiosError
-      ? (runMutation.error.response?.data?.detail ?? "Bir hata oluştu.")
+    runMutation.error
+      ? getApiErrorMessage(runMutation.error, "Bir hata oluştu.")
       : null;
 
   const otherDocs = (docsQuery.data ?? []).filter(

@@ -8,6 +8,7 @@ import { Card, Field } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatBytes } from "@/features/documents/api";
 import { shareApi } from "@/features/sharing/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function SharedDocumentPage() {
   const { token = "" } = useParams();
@@ -27,11 +28,9 @@ export default function SharedDocumentPage() {
     shareQuery.error instanceof AxiosError
       ? shareQuery.error.response?.status
       : undefined;
-  const errorMsg =
-    shareQuery.error instanceof AxiosError
-      ? (shareQuery.error.response?.data?.detail ??
-        "Bağlantı geçersiz veya süresi dolmuş.")
-      : null;
+  const errorMsg = shareQuery.error
+    ? getApiErrorMessage(shareQuery.error, "Bağlantı geçersiz veya süresi dolmuş.")
+    : null;
 
   const doc = shareQuery.data;
 
