@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import type { ModelInfo, ModelList } from "@/types/api";
+import type { IndexStatus, ModelInfo, ModelList } from "@/types/api";
 
 export const modelApi = {
   async list(): Promise<ModelList> {
@@ -19,6 +19,18 @@ export const modelApi = {
     const { data } = await apiClient.post<ModelInfo>(`/models/${orgId}/import`, {
       filename,
     });
+    return data;
+  },
+
+  async indexStatus(orgId: string): Promise<IndexStatus> {
+    const { data } = await apiClient.get<IndexStatus>(`/models/${orgId}/index`);
+    return data;
+  },
+
+  async rebuildIndex(orgId: string): Promise<{ reindexed: number; total: number }> {
+    const { data } = await apiClient.post<{ reindexed: number; total: number }>(
+      `/models/${orgId}/index/rebuild`,
+    );
     return data;
   },
 };

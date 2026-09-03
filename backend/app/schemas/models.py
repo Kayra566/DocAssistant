@@ -29,3 +29,16 @@ class SetActiveModelRequest(BaseModel):
 
 class ImportModelRequest(BaseModel):
     filename: str = Field(min_length=1, max_length=255)
+
+
+class IndexStatusResponse(BaseModel):
+    total_chunks: int
+    stale_chunks: int
+    dimension: int
+    provider: str
+    needs_reindex: bool
+
+
+class ReindexResponse(BaseModel):
+    reindexed: int
+    total: int

@@ -15,11 +15,13 @@ from app.models.user import User
 from app.schemas.models import (
     ActiveModelResponse,
     ImportModelRequest,
+    IndexStatusResponse,
     ModelInfoResponse,
     ModelListResponse,
+    ReindexResponse,
     SetActiveModelRequest,
 )
-from app.services import app_settings
+from app.services import app_settings, reindex
 
 router = APIRouter(prefix="/models", tags=["models"])
 
@@ -104,3 +106,23 @@ async def import_model(
         size_bytes=0,
         detail="İçe aktarıldı; artık seçilebilir.",
     )
+
+
+@router.get("/{org_id}/index", response_model=IndexStatusResponse)
+async def index_status(
+    org_id: uuid.UUID,
+    user: User = Depends(require_owner),
+    db: AsyncSession = Depends(get_db),
+):
+    """Mevcut embedding boyutuyla uyuşmayan chunk sayısını bildirir."""
+    return IndexStatusResponse(**await reindex.index_status(db, org_id))
+
+
+@router.post("/{org_id}/index/rebuild", response_model=ReindexResponse)
+async def rebuild_index(
+    org_id: uuid.UUID,
+    user: User = Depends(require_owner),
+    db: AsyncSession = Depends(get_db),
+):
+    """Embedding sağlayıcısı değiştikten sonra vektörleri yeniden üretir."""
+    return ReindexResponse(**await reindex.reindex_organization(db, org_id))

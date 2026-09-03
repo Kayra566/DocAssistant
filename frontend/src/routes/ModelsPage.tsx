@@ -13,9 +13,15 @@ export default function ModelsPage() {
   const queryClient = useQueryClient();
 
   const modelsQuery = useQuery({ queryKey: ["models"], queryFn: modelApi.list });
+  const indexQuery = useQuery({
+    queryKey: ["model-index", orgId],
+    queryFn: () => modelApi.indexStatus(orgId),
+  });
 
-  const invalidate = () =>
+  const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["models"] });
+    queryClient.invalidateQueries({ queryKey: ["model-index", orgId] });
+  };
 
   const activateMutation = useMutation({
     mutationFn: (modelId: string) => modelApi.setActive(orgId, modelId),
@@ -27,10 +33,17 @@ export default function ModelsPage() {
     onSuccess: invalidate,
   });
 
-  const error = activateMutation.error ?? importMutation.error;
+  const rebuildMutation = useMutation({
+    mutationFn: () => modelApi.rebuildIndex(orgId),
+    onSuccess: invalidate,
+  });
+
+  const error =
+    activateMutation.error ?? importMutation.error ?? rebuildMutation.error;
   const errorMsg = error ? getApiErrorMessage(error, "İşlem başarısız.") : null;
 
   const data = modelsQuery.data;
+  const index = indexQuery.data;
   const pending = activateMutation.isPending || importMutation.isPending;
 
   function renderAction(model: ModelInfo) {
@@ -121,6 +134,35 @@ export default function ModelsPage() {
             </li>
           ))}
         </ul>
+      </Card>
+
+      <Card className="space-y-3">
+        <h2 className="text-lg font-semibold">Arama dizini</h2>
+        <p className="text-sm text-neutral-400">
+          {index
+            ? `${index.total_chunks} parça · ${index.provider} · ${index.dimension} boyut`
+            : "Yükleniyor…"}
+        </p>
+        {index?.needs_reindex ? (
+          <>
+            <p className="rounded-md border border-yellow-800 bg-yellow-950/30 px-3 py-2 text-xs text-yellow-300">
+              {index.stale_chunks} parça eski embedding biçiminde. Bu parçalar aramada
+              bulunamaz — dizini yeniden oluşturun.
+            </p>
+            <Button
+              disabled={rebuildMutation.isPending}
+              onClick={() => rebuildMutation.mutate()}
+            >
+              {rebuildMutation.isPending
+                ? "Yeniden oluşturuluyor…"
+                : "Dizini yeniden oluştur"}
+            </Button>
+          </>
+        ) : (
+          index && (
+            <p className="text-xs text-green-400">Dizin güncel.</p>
+          )
+        )}
       </Card>
     </div>
   );

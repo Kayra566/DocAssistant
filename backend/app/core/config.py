@@ -58,7 +58,11 @@ class Settings(BaseSettings):
     ENABLE_OCR: bool = False
     # Embedding boyutu (hashing embedder için).
     EMBEDDING_DIM: int = 384
-    EMBEDDING_PROVIDER: Literal["hashing", "sentence_transformers"] = "hashing"
+    EMBEDDING_PROVIDER: Literal["hashing", "sentence_transformers", "ollama"] = (
+        "hashing"
+    )
+    # ollama sağlayıcısı için embedding modeli (ör. nomic-embed-text, mxbai-embed-large).
+    OLLAMA_EMBED_MODEL: str = "nomic-embed-text"
 
     # Plan bazlı doküman kotası (Faz 5'te Stripe ile genişleyecek)
     QUOTA_FREE_DOCUMENTS: int = 10

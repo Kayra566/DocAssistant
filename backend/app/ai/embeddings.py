@@ -32,21 +32,50 @@ def _hashing_embed(text: str, dim: int) -> list[float]:
 
 class Embedder:
     def __init__(self):
+        self.provider = settings.EMBEDDING_PROVIDER
         self.dim = settings.EMBEDDING_DIM
         self._model = None
-        if settings.EMBEDDING_PROVIDER == "sentence_transformers":
+
+        if self.provider == "sentence_transformers":
             from sentence_transformers import SentenceTransformer
 
             self._model = SentenceTransformer("all-MiniLM-L6-v2")
             self.dim = self._model.get_sentence_embedding_dimension()
+        elif self.provider == "ollama":
+            # Boyut ilk çağrıda modelden öğrenilir.
+            self.dim = 0
 
-    def embed(self, text: str) -> list[float]:
+    async def _embed_ollama(self, texts: list[str]) -> list[list[float]]:
+        import httpx
+
+        async with httpx.AsyncClient(timeout=settings.LLM_TIMEOUT_SECONDS) as client:
+            response = await client.post(
+                f"{settings.OLLAMA_BASE_URL}/api/embed",
+                json={"model": settings.OLLAMA_EMBED_MODEL, "input": texts},
+            )
+            response.raise_for_status()
+            vectors = response.json().get("embeddings") or []
+
+        if not vectors:
+            raise RuntimeError(
+                f"Ollama '{settings.OLLAMA_EMBED_MODEL}' modelinden embedding alınamadı."
+            )
+        self.dim = len(vectors[0])
+        return [[float(v) for v in vec] for vec in vectors]
+
+    async def embed(self, text: str) -> list[float]:
+        return (await self.embed_many([text]))[0]
+
+    async def embed_many(self, texts: list[str]) -> list[list[float]]:
+        if not texts:
+            return []
+        if self.provider == "ollama":
+            return await self._embed_ollama(texts)
         if self._model is not None:
-            return self._model.encode(text, normalize_embeddings=True).tolist()
-        return _hashing_embed(text, self.dim)
-
-    def embed_many(self, texts: list[str]) -> list[list[float]]:
-        return [self.embed(t) for t in texts]
+            return [
+                self._model.encode(t, normalize_embeddings=True).tolist() for t in texts
+            ]
+        return [_hashing_embed(t, self.dim) for t in texts]
 
 
 _embedder: Embedder | None = None
@@ -57,3 +86,8 @@ def get_embedder() -> Embedder:
     if _embedder is None:
         _embedder = Embedder()
     return _embedder
+
+
+def reset_embedder() -> None:
+    global _embedder
+    _embedder = None

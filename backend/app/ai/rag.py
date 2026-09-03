@@ -19,7 +19,7 @@ async def retrieve(
     question: str,
     top_k: int | None = None,
 ) -> list[tuple[DocumentChunk, float]]:
-    embedding = get_embedder().embed(question)
+    embedding = await get_embedder().embed(question)
     return await search_chunks(
         db,
         tenant_id=tenant_id,

@@ -343,3 +343,11 @@ export interface ModelList {
   models_dir: string;
   ollama_available: boolean;
 }
+
+export interface IndexStatus {
+  total_chunks: number;
+  stale_chunks: number;
+  dimension: number;
+  provider: string;
+  needs_reindex: boolean;
+}
