@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -7,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, Field } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { orgApi } from "@/features/auth/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import type { Role } from "@/types/api";
 
 export default function TeamPage() {
@@ -29,8 +29,8 @@ export default function TeamPage() {
   });
 
   const errorMsg =
-    inviteMutation.error instanceof AxiosError
-      ? (inviteMutation.error.response?.data?.detail ?? "Davet başarısız.")
+    inviteMutation.error
+      ? getApiErrorMessage(inviteMutation.error, "Davet başarısız.")
       : null;
 
   return (

@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { shareApi, shareExpired } from "@/features/sharing/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import type { SharePermission } from "@/types/api";
 
 const selectClass =
@@ -58,8 +58,8 @@ export function ShareDialog({
   });
 
   const errorMsg =
-    createMutation.error instanceof AxiosError
-      ? (createMutation.error.response?.data?.detail ?? "Bağlantı oluşturulamadı.")
+    createMutation.error
+      ? getApiErrorMessage(createMutation.error, "Bağlantı oluşturulamadı.")
       : null;
 
   async function copyUrl() {

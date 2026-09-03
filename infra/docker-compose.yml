@@ -76,6 +76,9 @@ services:
         condition: service_healthy
     volumes:
       - ../backend/app:/app/app
+    # Worker HTTP sunmaz; imajdaki HTTP healthcheck'i devre dışı bırak.
+    healthcheck:
+      disable: true
     command: celery -A app.workers.celery_app worker --loglevel=info
 
   frontend:

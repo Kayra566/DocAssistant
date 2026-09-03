@@ -2,12 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import { AxiosError } from "axios";
 
 import { Button } from "@/components/ui/button";
 import { Card, Field } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { authApi } from "@/features/auth/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { type LoginInput, loginSchema } from "@/lib/validators";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -28,10 +28,9 @@ export default function LoginPage() {
     },
   });
 
-  const errorMsg =
-    mutation.error instanceof AxiosError
-      ? (mutation.error.response?.data?.detail ?? "Giriş başarısız.")
-      : null;
+  const errorMsg = mutation.error
+    ? getApiErrorMessage(mutation.error, "Giriş başarısız.")
+    : null;
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
