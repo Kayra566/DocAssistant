@@ -21,6 +21,7 @@ class OrganizationResponse(BaseModel):
     name: str
     slug: str
     plan: Plan
+    role: Role | None = None
     created_at: datetime
 
 

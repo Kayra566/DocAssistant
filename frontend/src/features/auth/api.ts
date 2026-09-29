@@ -84,4 +84,12 @@ export const orgApi = {
     );
     return data;
   },
+
+  async acceptInvite(token: string): Promise<MessageResponse> {
+    const { data } = await apiClient.post<MessageResponse>(
+      "/organizations/invitations/accept",
+      { token },
+    );
+    return data;
+  },
 };

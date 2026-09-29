@@ -43,7 +43,11 @@ export default function ModelsPage() {
   });
 
   const error =
-    activateMutation.error ?? importMutation.error ?? rebuildMutation.error;
+    modelsQuery.error ??
+    indexQuery.error ??
+    activateMutation.error ??
+    importMutation.error ??
+    rebuildMutation.error;
   const errorMsg = error ? getApiErrorMessage(error, "İşlem başarısız.") : null;
 
   const data = modelsQuery.data;

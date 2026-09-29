@@ -1,7 +1,7 @@
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,9 +18,39 @@ interface UiMessage {
 
 export default function ChatPage() {
   const { orgId = "", docId = "" } = useParams();
+  const [params, setParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const [question, setQuestion] = useState("");
-  const [conversationId, setConversationId] = useState<string | undefined>();
+  const conversationId = params.get("conversation") ?? undefined;
   const [messages, setMessages] = useState<UiMessage[]>([]);
+
+  const conversationsQuery = useQuery({
+    queryKey: ["conversations", orgId, docId],
+    queryFn: () => aiApi.conversations(orgId, docId),
+  });
+  const messagesQuery = useQuery({
+    queryKey: ["messages", orgId, conversationId],
+    queryFn: () => aiApi.messages(orgId, conversationId!),
+    enabled: Boolean(conversationId),
+  });
+
+  useEffect(() => {
+    if (!conversationId && conversationsQuery.data?.[0]) {
+      setParams({ conversation: conversationsQuery.data[0].id }, { replace: true });
+    }
+  }, [conversationId, conversationsQuery.data, setParams]);
+
+  useEffect(() => {
+    if (messagesQuery.data) {
+      setMessages(
+        messagesQuery.data.map((message) => ({
+          role: message.role,
+          content: message.content,
+          citations: message.citations ?? undefined,
+        })),
+      );
+    }
+  }, [messagesQuery.data]);
 
   const chatMutation = useMutation({
     mutationFn: () =>
@@ -30,11 +60,17 @@ export default function ChatPage() {
         conversation_id: conversationId,
       }),
     onSuccess: (res) => {
-      setConversationId(res.conversation_id);
+      setParams({ conversation: res.conversation_id }, { replace: true });
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: res.answer, citations: res.citations },
       ]);
+      queryClient.invalidateQueries({
+        queryKey: ["conversations", orgId, docId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["messages", orgId, res.conversation_id],
+      });
     },
   });
 
@@ -59,6 +95,22 @@ export default function ChatPage() {
         ← Dokümanlara dön
       </Link>
       <h1 className="text-2xl font-bold">Doküman Sohbeti</h1>
+      {(conversationsQuery.data?.length ?? 0) > 0 && (
+        <select
+          aria-label="Sohbet geçmişi"
+          className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm"
+          value={conversationId ?? ""}
+          onChange={(event) =>
+            setParams({ conversation: event.target.value }, { replace: true })
+          }
+        >
+          {conversationsQuery.data?.map((conversation) => (
+            <option key={conversation.id} value={conversation.id}>
+              {conversation.title}
+            </option>
+          ))}
+        </select>
+      )}
 
       <div className="flex-1 space-y-3 overflow-y-auto">
         {messages.length === 0 && (

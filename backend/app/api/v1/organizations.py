@@ -32,7 +32,13 @@ async def list_my_organizations(
     user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):
     rows = await org_service.list_user_organizations(db, user)
-    return [OrganizationResponse.model_validate(o) for o, _ in rows]
+    return [
+        OrganizationResponse(
+            **OrganizationResponse.model_validate(org).model_dump(exclude={"role"}),
+            role=role,
+        )
+        for org, role in rows
+    ]
 
 
 @router.post("", response_model=OrganizationResponse, status_code=201)

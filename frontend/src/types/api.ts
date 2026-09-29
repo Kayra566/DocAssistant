@@ -22,6 +22,7 @@ export interface Organization {
   name: string;
   slug: string;
   plan: Plan;
+  role: Role | null;
   created_at: string;
 }
 
@@ -82,6 +83,13 @@ export interface ChatMessage {
   content: string;
   citations: Citation[] | null;
   tokens: number;
+  created_at: string;
+}
+
+export interface Conversation {
+  id: string;
+  document_id: string;
+  title: string;
   created_at: string;
 }
 

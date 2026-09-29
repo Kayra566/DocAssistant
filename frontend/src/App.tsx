@@ -6,6 +6,8 @@ import AccountPage from "@/routes/AccountPage";
 import AdminPage from "@/routes/AdminPage";
 import AiToolsPage from "@/routes/AiToolsPage";
 import AnalyticsPage from "@/routes/AnalyticsPage";
+import AcceptInvitePage from "@/routes/AcceptInvitePage";
+import BillingReturnPage from "@/routes/BillingReturnPage";
 import BillingPage from "@/routes/BillingPage";
 import ChatPage from "@/routes/ChatPage";
 import DashboardPage from "@/routes/DashboardPage";
@@ -34,6 +36,7 @@ export default function App() {
         <Route path="/share/:token" element={<SharedDocumentPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
+        <Route path="/accept-invite" element={<AcceptInvitePage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -53,6 +56,7 @@ export default function App() {
           />
           <Route path="/organizations/:orgId/team" element={<TeamPage />} />
           <Route path="/organizations/:orgId/billing" element={<BillingPage />} />
+          <Route path="/billing" element={<BillingReturnPage />} />
           <Route
             path="/organizations/:orgId/analytics"
             element={<AnalyticsPage />}
