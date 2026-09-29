@@ -13,7 +13,6 @@ from app.core.exceptions import AuthError
 from app.core.logging import get_logger
 from app.core.storage import get_storage
 from app.models.ai import AIJob, ChatMessage, Conversation
-from app.models.billing import Subscription
 from app.models.collab import ActivityLog, DocumentComment, ExportJob, ShareLink
 from app.models.document import Document
 from app.models.enums import Role
@@ -56,12 +55,8 @@ async def export_user_data(db: AsyncSession, user: User) -> dict[str, Any]:
         if org_ids
         else []
     )
-    documents = (
-        await _scalars(
-            db, select(Document).where(Document.organization_id.in_(org_ids))
-        )
-        if org_ids
-        else []
+    documents = await _scalars(
+        db, select(Document).where(Document.owner_id == user.id)
     )
     ai_jobs = await _scalars(db, select(AIJob).where(AIJob.user_id == user.id))
     conversations = await _scalars(
@@ -87,13 +82,6 @@ async def export_user_data(db: AsyncSession, user: User) -> dict[str, Any]:
     )
     notifications = await _scalars(
         db, select(Notification).where(Notification.user_id == user.id)
-    )
-    subscriptions = (
-        await _scalars(
-            db, select(Subscription).where(Subscription.organization_id.in_(org_ids))
-        )
-        if org_ids
-        else []
     )
 
     return {
@@ -129,9 +117,6 @@ async def export_user_data(db: AsyncSession, user: User) -> dict[str, Any]:
         ),
         "notifications": _rows(
             notifications, ("id", "type", "title", "body", "read", "created_at")
-        ),
-        "subscriptions": _rows(
-            subscriptions, ("id", "organization_id", "plan", "status", "current_period_end")
         ),
     }
 

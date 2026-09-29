@@ -12,14 +12,18 @@ export default function ModelsPage() {
   const { orgId = "" } = useParams();
   const queryClient = useQueryClient();
 
-  const modelsQuery = useQuery({ queryKey: ["models"], queryFn: modelApi.list });
+  const modelsQuery = useQuery({
+    queryKey: ["models", orgId],
+    queryFn: () => modelApi.list(orgId),
+    enabled: Boolean(orgId),
+  });
   const indexQuery = useQuery({
     queryKey: ["model-index", orgId],
     queryFn: () => modelApi.indexStatus(orgId),
   });
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ["models"] });
+    queryClient.invalidateQueries({ queryKey: ["models", orgId] });
     queryClient.invalidateQueries({ queryKey: ["model-index", orgId] });
   };
 

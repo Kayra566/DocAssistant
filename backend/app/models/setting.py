@@ -1,9 +1,15 @@
+import uuid
+
 from sqlalchemy import JSON, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import BaseModel
 
 ACTIVE_LLM = "llm.active"
+
+
+def active_llm_key(organization_id: uuid.UUID) -> str:
+    return f"{ACTIVE_LLM}:{organization_id}"
 
 
 class AppSetting(BaseModel):

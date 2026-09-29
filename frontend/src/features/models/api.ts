@@ -2,8 +2,10 @@ import { apiClient } from "@/lib/api-client";
 import type { IndexStatus, ModelInfo, ModelList } from "@/types/api";
 
 export const modelApi = {
-  async list(): Promise<ModelList> {
-    const { data } = await apiClient.get<ModelList>("/models");
+  async list(orgId: string): Promise<ModelList> {
+    const { data } = await apiClient.get<ModelList>("/models", {
+      params: { org_id: orgId },
+    });
     return data;
   },
 

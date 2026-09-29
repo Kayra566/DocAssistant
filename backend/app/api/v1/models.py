@@ -1,16 +1,16 @@
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai import registry
 from app.ai.provider import reset_provider
-from app.api.deps import get_current_user, require_role
+from app.api.deps import require_role
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import ValidationError
 from app.models.enums import Role
-from app.models.setting import ACTIVE_LLM
+from app.models.setting import active_llm_key
 from app.models.user import User
 from app.schemas.models import (
     ActiveModelResponse,
@@ -26,10 +26,13 @@ from app.services import app_settings, reindex
 router = APIRouter(prefix="/models", tags=["models"])
 
 require_owner = require_role(Role.OWNER)
+require_viewer = require_role(Role.VIEWER)
 
 
-async def _active(db: AsyncSession) -> ActiveModelResponse:
-    value, _ = await app_settings.get(db, ACTIVE_LLM)
+async def _active(
+    db: AsyncSession, organization_id: uuid.UUID
+) -> ActiveModelResponse:
+    value, _ = await app_settings.get(db, active_llm_key(organization_id))
     model_id = (value or {}).get("model_id")
     if not model_id:
         # Ayar yapılmadıysa .env'deki yapılandırma geçerlidir.
@@ -43,12 +46,13 @@ async def _active(db: AsyncSession) -> ActiveModelResponse:
 
 @router.get("", response_model=ModelListResponse)
 async def list_models(
-    user: User = Depends(get_current_user),
+    org_id: uuid.UUID = Query(),
+    user: User = Depends(require_viewer),
     db: AsyncSession = Depends(get_db),
 ):
     """Klasöre bırakılan dosyaları ve Ollama modellerini birlikte listeler."""
     models = await registry.discover()
-    active = await _active(db)
+    active = await _active(db, org_id)
     return ModelListResponse(
         models=[ModelInfoResponse(**m.as_dict()) for m in models],
         active_model_id=active.model_id,
@@ -57,12 +61,13 @@ async def list_models(
     )
 
 
-@router.get("/active", response_model=ActiveModelResponse)
+@router.get("/{org_id}/active", response_model=ActiveModelResponse)
 async def active_model(
-    user: User = Depends(get_current_user),
+    org_id: uuid.UUID,
+    user: User = Depends(require_viewer),
     db: AsyncSession = Depends(get_db),
 ):
-    return await _active(db)
+    return await _active(db, org_id)
 
 
 @router.put("/{org_id}/active", response_model=ActiveModelResponse)
@@ -79,9 +84,11 @@ async def set_active_model(
             "Model kullanıma hazır değil. Dosya modellerini önce içe aktarın."
         )
 
-    await app_settings.set_value(db, ACTIVE_LLM, {"model_id": payload.model_id})
-    reset_provider()
-    return await _active(db)
+    await app_settings.set_value(
+        db, active_llm_key(org_id), {"model_id": payload.model_id}
+    )
+    reset_provider(org_id)
+    return await _active(db, org_id)
 
 
 @router.post("/{org_id}/import", response_model=ModelInfoResponse)

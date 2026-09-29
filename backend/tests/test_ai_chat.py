@@ -68,6 +68,30 @@ async def test_chat_conversation_continuity(client):
     assert len(msgs.json()) == 4
 
 
+async def test_conversation_cannot_be_reused_for_another_document(client):
+    access, org_id = await setup_org(client, "chat-conv-doc@example.com")
+    first_doc = await _upload_doc(client, access, org_id, filename="first.txt")
+    second_doc = await _upload_doc(client, access, org_id, filename="second.txt")
+    first = (
+        await client.post(
+            f"/api/v1/ai/{org_id}/chat",
+            headers=auth_headers(access),
+            json={"document_id": first_doc["id"], "question": "Gelir nedir?"},
+        )
+    ).json()
+
+    reused = await client.post(
+        f"/api/v1/ai/{org_id}/chat",
+        headers=auth_headers(access),
+        json={
+            "document_id": second_doc["id"],
+            "question": "Gelir nedir?",
+            "conversation_id": first["conversation_id"],
+        },
+    )
+    assert reused.status_code == 404
+
+
 async def test_prompt_injection_blocked(client):
     access, org_id = await setup_org(client, "chat-inj@example.com")
     doc = await _upload_doc(client, access, org_id)
@@ -102,6 +126,39 @@ async def test_cache_hit_second_time(client):
     assert second["cache_hit"] is True
     assert second["tokens_used"] == 0
     assert second["answer"] == first["answer"]
+
+
+async def test_model_change_invalidates_chat_cache(client):
+    access, org_id = await setup_org(client, "chat-model-cache@example.com")
+    doc = await _upload_doc(client, access, org_id)
+    payload = {"document_id": doc["id"], "question": "Gelir ne kadar?"}
+
+    first = await client.post(
+        f"/api/v1/ai/{org_id}/chat",
+        headers=auth_headers(access),
+        json=payload,
+    )
+    second = await client.post(
+        f"/api/v1/ai/{org_id}/chat",
+        headers=auth_headers(access),
+        json=payload,
+    )
+    assert first.json()["cache_hit"] is False
+    assert second.json()["cache_hit"] is True
+
+    switched = await client.put(
+        f"/api/v1/models/{org_id}/active",
+        headers=auth_headers(access),
+        json={"model_id": "builtin:fake"},
+    )
+    assert switched.status_code == 200
+
+    after_switch = await client.post(
+        f"/api/v1/ai/{org_id}/chat",
+        headers=auth_headers(access),
+        json=payload,
+    )
+    assert after_switch.json()["cache_hit"] is False
 
 
 async def test_ai_quota_enforced(client, monkeypatch):

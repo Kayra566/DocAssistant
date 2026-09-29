@@ -73,7 +73,7 @@ async def list_conversations(
     user: User = Depends(require_viewer),
     db: AsyncSession = Depends(get_db),
 ):
-    convs = await ai_chat.list_conversations(db, org_id, document_id)
+    convs = await ai_chat.list_conversations(db, org_id, document_id, user.id)
     return [ConversationResponse.model_validate(c) for c in convs]
 
 
@@ -87,7 +87,7 @@ async def get_messages(
     user: User = Depends(require_viewer),
     db: AsyncSession = Depends(get_db),
 ):
-    msgs = await ai_chat.get_messages(db, org_id, conversation_id)
+    msgs = await ai_chat.get_messages(db, org_id, conversation_id, user.id)
     return [MessageResponse.model_validate(m) for m in msgs]
 
 

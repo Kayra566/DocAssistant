@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -15,6 +15,7 @@ import { useAuthStore } from "@/stores/authStore";
 export default function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, refreshToken, clear, setUser } = useAuthStore();
 
   const meQuery = useQuery({
@@ -41,6 +42,7 @@ export default function DashboardPage() {
 
   async function handleLogout() {
     if (refreshToken) await authApi.logout(refreshToken).catch(() => undefined);
+    queryClient.clear();
     clear();
     navigate("/login");
   }

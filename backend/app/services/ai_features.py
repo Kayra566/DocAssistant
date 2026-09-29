@@ -19,7 +19,7 @@ from app.ai.prompts import (
     summary_instruction,
     translate_instruction,
 )
-from app.ai.provider import SYSTEM_PROMPT, get_active_provider
+from app.ai.provider import SYSTEM_PROMPT, active_model_context, get_active_provider
 from app.ai.tokens import estimate_tokens
 from app.core.config import settings
 from app.core.exceptions import NotFoundError, ValidationError
@@ -152,9 +152,13 @@ async def run_job(db: AsyncSession, job: AIJob) -> AIJob:
         prompt = await _build_prompt(db, job)
         await ensure_ai_quota(db, job.organization_id, estimate_tokens(prompt))
 
+        model_id, model_version = await active_model_context(db, job.organization_id)
         key = cache_key(
             job.type,
+            str(job.organization_id),
             str(job.document_id),
+            model_id,
+            str(model_version),
             json.dumps(job.params or {}, sort_keys=True, ensure_ascii=False),
         )
         cache = get_cache()
@@ -164,7 +168,7 @@ async def run_job(db: AsyncSession, job: AIJob) -> AIJob:
             job.cache_hit = True
             job.tokens_used = 0
         else:
-            provider = await get_active_provider(db)
+            provider = await get_active_provider(db, job.organization_id)
             raw = moderate_output(
                 await provider.complete(system=SYSTEM_PROMPT, prompt=prompt)
             )

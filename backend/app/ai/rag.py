@@ -50,6 +50,8 @@ def to_citations(scored: list[tuple[DocumentChunk, float]]) -> list[dict]:
     ]
 
 
-async def generate_answer(db: AsyncSession, prompt: str) -> str:
-    provider = await get_active_provider(db)
+async def generate_answer(
+    db: AsyncSession, organization_id: uuid.UUID, prompt: str
+) -> str:
+    provider = await get_active_provider(db, organization_id)
     return await provider.complete(system=SYSTEM_PROMPT, prompt=prompt)

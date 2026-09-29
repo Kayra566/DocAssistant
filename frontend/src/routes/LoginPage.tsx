@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -13,6 +13,7 @@ import { useAuthStore } from "@/stores/authStore";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const setTokens = useAuthStore((s) => s.setTokens);
   const {
     register,
@@ -23,6 +24,7 @@ export default function LoginPage() {
   const mutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (tokens) => {
+      queryClient.clear();
       setTokens(tokens.access_token, tokens.refresh_token);
       navigate("/dashboard");
     },

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from collections.abc import AsyncIterator
 from typing import Protocol
 
@@ -98,8 +99,7 @@ class OllamaProvider:
 
 
 _provider: LLMProvider | None = None
-# Aktif model ayarının uygulanmış sürümü; DB'de artınca sağlayıcı yeniden kurulur.
-_provider_version = -1
+_providers: dict[uuid.UUID, tuple[int, LLMProvider]] = {}
 
 
 def build_provider(model_id: str | None) -> LLMProvider:
@@ -120,21 +120,36 @@ def get_provider() -> LLMProvider:
     return _provider
 
 
-async def get_active_provider(db) -> LLMProvider:
-    """Arayüzden seçilen modeli uygular; değişiklik yeniden başlatma gerektirmez."""
-    global _provider, _provider_version
-
-    from app.models.setting import ACTIVE_LLM
+async def active_model_context(db, organization_id: uuid.UUID) -> tuple[str, int]:
+    """Tenant'ın aktif model kimliğini ve cache sürümünü döndürür."""
+    from app.models.setting import active_llm_key
     from app.services import app_settings
 
-    value, version = await app_settings.get(db, ACTIVE_LLM)
-    if _provider is None or version != _provider_version:
-        _provider = build_provider((value or {}).get("model_id"))
-        _provider_version = version
-    return _provider
+    value, version = await app_settings.get(db, active_llm_key(organization_id))
+    model_id = (value or {}).get("model_id")
+    if not model_id:
+        model_id = (
+            f"ollama:{settings.OLLAMA_MODEL}"
+            if settings.LLM_PROVIDER == "ollama"
+            else "builtin:fake"
+        )
+    return model_id, version
 
 
-def reset_provider() -> None:
-    global _provider, _provider_version
+async def get_active_provider(db, organization_id: uuid.UUID) -> LLMProvider:
+    """Arayüzden seçilen modeli uygular; değişiklik yeniden başlatma gerektirmez."""
+    model_id, version = await active_model_context(db, organization_id)
+    cached = _providers.get(organization_id)
+    if cached is None or cached[0] != version:
+        cached = (version, build_provider(model_id))
+        _providers[organization_id] = cached
+    return cached[1]
+
+
+def reset_provider(organization_id: uuid.UUID | None = None) -> None:
+    global _provider
     _provider = None
-    _provider_version = -1
+    if organization_id is None:
+        _providers.clear()
+    else:
+        _providers.pop(organization_id, None)
