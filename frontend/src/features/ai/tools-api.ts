@@ -89,6 +89,11 @@ export const aiToolsApi = {
     });
     return data;
   },
+
+  job: async (orgId: string, jobId: string): Promise<AIJob> => {
+    const { data } = await apiClient.get<AIJob>(`/ai/${orgId}/jobs/${jobId}`);
+    return data;
+  },
 };
 
 /** AIJob.result içeriğini UI'da göstermeye uygun biçime indirger. */

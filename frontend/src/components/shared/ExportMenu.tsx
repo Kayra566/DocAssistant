@@ -17,8 +17,18 @@ export function ExportMenu({
 
   const mutation = useMutation({
     mutationFn: async (format: ExportFormat) => {
-      const job = await exportApi.create(orgId, aiJobId, format);
-      if (job.status !== "done") throw new Error(job.error ?? "Export başarısız.");
+      let job = await exportApi.create(orgId, aiJobId, format);
+      for (
+        let attempt = 0;
+        attempt < 120 && (job.status === "pending" || job.status === "running");
+        attempt += 1
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 1_000));
+        job = await exportApi.get(orgId, job.id);
+      }
+      if (job.status !== "done") {
+        throw new Error(job.error ?? "Export zamanında tamamlanamadı.");
+      }
       await exportApi.download(orgId, job);
     },
     onSettled: () => setPending(null),

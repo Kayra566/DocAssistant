@@ -82,10 +82,29 @@ services:
         condition: service_healthy
     volumes:
       - ../backend/app:/app/app
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
     # Worker HTTP sunmaz; imajdaki HTTP healthcheck'i devre dışı bırak.
     healthcheck:
       disable: true
     command: celery -A app.workers.celery_app worker --loglevel=info
+
+  beat:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    env_file:
+      - ../backend/.env
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../backend/app:/app/app
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+    healthcheck:
+      disable: true
+    command: celery -A app.workers.celery_app beat --loglevel=info
 
   # Yerel LLM. Varsayılan olarak başlamaz (birkaç GB model indirir):
   #   docker compose --profile ai up -d

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "react-router-dom";
 
@@ -134,6 +134,9 @@ function ExtractResult({ job }: { job: AIJob }) {
 }
 
 function JobResult({ job }: { job: AIJob }) {
+  if (job.status === "pending" || job.status === "running") {
+    return <p className="text-sm text-yellow-400">İşlem devam ediyor…</p>;
+  }
   if (job.status === "failed") {
     return <p className="text-sm text-red-400">{job.error}</p>;
   }
@@ -190,7 +193,38 @@ export default function AiToolsPage() {
   const jobsQuery = useQuery({
     queryKey: ["ai-jobs", orgId, docId],
     queryFn: () => aiToolsApi.jobs(orgId, { documentId: docId }),
+    refetchInterval: (query) =>
+      query.state.data?.some(
+        (item) => item.status === "pending" || item.status === "running",
+      )
+        ? 1_500
+        : false,
   });
+
+  const activeJobQuery = useQuery({
+    queryKey: ["ai-job", orgId, job?.id],
+    queryFn: () => aiToolsApi.job(orgId, job!.id),
+    enabled:
+      Boolean(job?.id) &&
+      (job?.status === "pending" || job?.status === "running"),
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === "done" || status === "failed" ? false : 1_000;
+    },
+  });
+
+  useEffect(() => {
+    if (!activeJobQuery.data) return;
+    setJob(activeJobQuery.data);
+    if (
+      activeJobQuery.data.status === "done" ||
+      activeJobQuery.data.status === "failed"
+    ) {
+      queryClient.invalidateQueries({
+        queryKey: ["ai-jobs", orgId, docId],
+      });
+    }
+  }, [activeJobQuery.data, docId, orgId, queryClient]);
 
   const runMutation = useMutation({
     mutationFn: (): Promise<AIJob> => {

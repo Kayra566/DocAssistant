@@ -25,6 +25,12 @@ export default function DocumentsPage() {
   const docsQuery = useQuery({
     queryKey: ["documents", orgId],
     queryFn: () => documentApi.list(orgId),
+    refetchInterval: (query) =>
+      query.state.data?.some(
+        (doc) => doc.status === "uploaded" || doc.status === "processing",
+      )
+        ? 1_500
+        : false,
   });
 
   const uploadMutation = useMutation({
