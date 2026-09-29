@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { aiApi } from "@/features/ai/api";
+import { documentApi } from "@/features/documents/api";
 import { getApiErrorMessage } from "@/lib/api-error";
 import type { Citation } from "@/types/api";
 
@@ -21,6 +22,9 @@ export default function ChatPage() {
   const [params, setParams] = useSearchParams();
   const queryClient = useQueryClient();
   const [question, setQuestion] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewPage, setPreviewPage] = useState<number | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const conversationId = params.get("conversation") ?? undefined;
   const [messages, setMessages] = useState<UiMessage[]>([]);
 
@@ -86,8 +90,26 @@ export default function ChatPage() {
     setQuestion("");
   }
 
+  async function openCitation(citation: Citation) {
+    setPreviewError(null);
+    try {
+      const url = await documentApi.previewUrl(orgId, citation.document_id);
+      setPreviewPage(citation.page);
+      setPreviewUrl(`${url}#page=${citation.page}`);
+    } catch (error) {
+      setPreviewError(
+        getApiErrorMessage(error, "PDF önizlemesi açılamadı."),
+      );
+    }
+  }
+
   return (
-    <div className="mx-auto flex h-screen max-w-3xl flex-col gap-4 p-8">
+    <div
+      className={`mx-auto grid h-screen gap-4 p-8 ${
+        previewUrl ? "max-w-7xl lg:grid-cols-2" : "max-w-3xl"
+      }`}
+    >
+      <section className="flex min-h-0 flex-col gap-4">
       <Link
         to={`/organizations/${orgId}/documents`}
         className="text-sm text-indigo-400 hover:underline"
@@ -132,13 +154,15 @@ export default function ChatPage() {
             {m.citations && m.citations.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
                 {m.citations.map((c, ci) => (
-                  <span
+                  <button
+                    type="button"
                     key={ci}
                     title={c.snippet}
-                    className="rounded bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400"
+                    onClick={() => void openCitation(c)}
+                    className="rounded bg-neutral-800 px-2 py-0.5 text-xs text-indigo-300 hover:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   >
                     Sayfa {c.page} · {(c.score * 100).toFixed(0)}%
-                  </span>
+                  </button>
                 ))}
               </div>
             )}
@@ -150,6 +174,11 @@ export default function ChatPage() {
       </div>
 
       {errorMsg && <p className="text-sm text-red-400">{errorMsg}</p>}
+      {previewError && (
+        <p role="alert" className="text-sm text-red-400">
+          {previewError}
+        </p>
+      )}
 
       <form
         className="flex gap-2"
@@ -167,6 +196,34 @@ export default function ChatPage() {
           Gönder
         </Button>
       </form>
+      </section>
+
+      {previewUrl && (
+        <section className="flex min-h-[60vh] flex-col overflow-hidden rounded-lg border border-neutral-800 bg-neutral-950">
+          <div className="flex items-center justify-between border-b border-neutral-800 px-3 py-2">
+            <p className="text-sm text-neutral-300">
+              PDF önizleme · Sayfa {previewPage}
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              className="px-2 py-1 text-xs"
+              onClick={() => {
+                setPreviewUrl(null);
+                setPreviewPage(null);
+              }}
+            >
+              Kapat
+            </Button>
+          </div>
+          <iframe
+            key={previewUrl}
+            title={`PDF önizleme, sayfa ${previewPage}`}
+            src={previewUrl}
+            className="min-h-0 flex-1 bg-white"
+          />
+        </section>
+      )}
     </div>
   );
 }

@@ -44,6 +44,20 @@ services:
       timeout: 5s
       retries: 5
 
+  # Dosya yükleme zararlı yazılım taraması:
+  #   ENABLE_MALWARE_SCAN=true docker compose --profile security up -d
+  clamav:
+    image: clamav/clamav:1.4
+    profiles: ["security"]
+    volumes:
+      - clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "clamdscan", "--ping", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
   backend:
     build:
       context: ../backend
@@ -67,6 +81,8 @@ services:
       MODELS_DIR: /models
       MODELS_MOUNT_PATH: /models
       OLLAMA_BASE_URL: http://ollama:11434
+      ENABLE_MALWARE_SCAN: ${ENABLE_MALWARE_SCAN:-false}
+      CLAMAV_HOST: clamav
     command: >
       sh -c "alembic upgrade head &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
@@ -130,4 +146,5 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  clamav_data:
   ollama_models:

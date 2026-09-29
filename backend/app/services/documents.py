@@ -13,6 +13,7 @@ from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.services.quota import ensure_document_quota
 from app.utils.chunking import chunk_pages
 from app.utils.file_validator import MIME_MAP, detect_file_type, validate_size
+from app.utils.malware_scanner import scan_upload
 from app.utils.text_extractor import extract_pages
 
 
@@ -61,6 +62,7 @@ async def upload_document(
 ) -> Document:
     validate_size(len(data))
     file_type = detect_file_type(filename, data)
+    await scan_upload(data)
     await ensure_document_quota(db, org_id, len(data))
 
     doc_id = uuid.uuid4()
