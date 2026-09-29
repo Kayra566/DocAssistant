@@ -119,6 +119,9 @@ jobs:
       - name: Install frontend
         working-directory: frontend
         run: npm ci
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
       - name: Install Playwright browser
         working-directory: frontend
         run: npx playwright install --with-deps chromium
