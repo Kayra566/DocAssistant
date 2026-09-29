@@ -7,6 +7,13 @@ export const documentApi = {
     return data;
   },
 
+  async get(orgId: string, docId: string): Promise<Document> {
+    const { data } = await apiClient.get<Document>(
+      `/documents/${orgId}/${docId}`,
+    );
+    return data;
+  },
+
   async upload(orgId: string, file: File): Promise<Document> {
     const form = new FormData();
     form.append("file", file);
@@ -37,6 +44,13 @@ export const documentApi = {
   async downloadUrl(orgId: string, docId: string): Promise<string> {
     const { data } = await apiClient.get<{ url: string }>(
       `/documents/${orgId}/${docId}/download-url`,
+    );
+    return data.url;
+  },
+
+  async previewUrl(orgId: string, docId: string): Promise<string> {
+    const { data } = await apiClient.get<{ url: string }>(
+      `/documents/${orgId}/${docId}/preview-url`,
     );
     return data.url;
   },

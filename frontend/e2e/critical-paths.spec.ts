@@ -7,12 +7,29 @@ function uniqueEmail(prefix: string): string {
 
 const PASSWORD = "Tr0ub4dour&3xample!";
 
+async function registerAndLogin(page: import("@playwright/test").Page, email: string) {
+  await page.goto("/register");
+  await page.getByLabel(/E-?posta|Email/i).fill(email);
+  await page.getByLabel(/Parola|Password/i).first().fill(PASSWORD);
+  await page.getByRole("button", { name: /Kayıt|Register|Hesap/i }).click();
+
+  await expect(page).toHaveURL(/\/verify-email/, { timeout: 20_000 });
+  await page.getByRole("link", { name: /Giriş|Login/i }).click();
+  await page.getByLabel(/E-?posta|Email/i).fill(email);
+  await page.getByLabel(/Parola|Password/i).first().fill(PASSWORD);
+  await page.getByRole("button", { name: /Giriş|Sign in|Login/i }).click();
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 20_000 });
+}
+
 test("landing page yönlendirmeleri ve yasal sayfalar çalışır", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-  await page.getByRole("link", { name: /Gizlilik|Privacy/ }).first().click();
+  await page
+    .getByRole("region")
+    .getByRole("link", { name: /Gizlilik|Privacy|Cookie policy/ })
+    .click();
   await expect(page).toHaveURL(/\/privacy/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
@@ -33,22 +50,7 @@ test("çerez banner'ı seçim sonrası kaybolur", async ({ page }) => {
 test("kayıt → doküman yükleme → AI özeti → dışa aktarma akışı", async ({ page }) => {
   const email = uniqueEmail("e2e");
 
-  await page.goto("/register");
-  await page.getByLabel(/E-?posta|Email/i).fill(email);
-  await page.getByLabel(/Parola|Password/i).first().fill(PASSWORD);
-  await page.getByRole("button", { name: /Kayıt|Register|Hesap/i }).click();
-
-  await expect(page).toHaveURL(/\/(dashboard|verify-email|login)/, {
-    timeout: 20_000,
-  });
-
-  if (page.url().includes("/login")) {
-    await page.getByLabel(/E-?posta|Email/i).fill(email);
-    await page.getByLabel(/Parola|Password/i).first().fill(PASSWORD);
-    await page.getByRole("button", { name: /Giriş|Sign in|Login/i }).click();
-  }
-
-  await page.goto("/dashboard");
+  await registerAndLogin(page, email);
   await expect(page.getByText(email)).toBeVisible({ timeout: 20_000 });
 
   await page.getByRole("link", { name: /Dokümanlar|Documents/ }).first().click();
@@ -80,11 +82,7 @@ test("paylaşım bağlantısı oluşturulur ve public sayfada açılır", async 
 }) => {
   const email = uniqueEmail("share");
 
-  await page.goto("/register");
-  await page.getByLabel(/E-?posta|Email/i).fill(email);
-  await page.getByLabel(/Parola|Password/i).first().fill(PASSWORD);
-  await page.getByRole("button", { name: /Kayıt|Register|Hesap/i }).click();
-  await page.goto("/dashboard");
+  await registerAndLogin(page, email);
 
   await page.getByRole("link", { name: /Dokümanlar|Documents/ }).first().click();
   await page.setInputFiles('input[type="file"]', {

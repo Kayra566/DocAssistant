@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -49,6 +49,7 @@ function UsageBar({
 
 export default function BillingPage() {
   const { orgId = "" } = useParams();
+  const [params] = useSearchParams();
   const queryClient = useQueryClient();
 
   const plansQuery = useQuery({ queryKey: ["plans"], queryFn: billingApi.plans });
@@ -60,6 +61,7 @@ export default function BillingPage() {
   const checkoutMutation = useMutation({
     mutationFn: (plan: Plan) => billingApi.checkout(orgId, plan),
     onSuccess: ({ url }) => {
+      sessionStorage.setItem("docassistant-billing-org", orgId);
       window.location.href = url;
     },
   });
@@ -67,6 +69,7 @@ export default function BillingPage() {
   const portalMutation = useMutation({
     mutationFn: () => billingApi.portal(orgId),
     onSuccess: ({ url }) => {
+      sessionStorage.setItem("docassistant-billing-org", orgId);
       window.location.href = url;
     },
     onSettled: () =>
@@ -85,6 +88,16 @@ export default function BillingPage() {
         ← Panele dön
       </Link>
       <h1 className="text-3xl font-bold">Plan ve Kullanım</h1>
+      {params.get("status") === "success" && (
+        <p className="rounded-md border border-green-800 p-3 text-sm text-green-400">
+          Ödeme tamamlandı. Abonelik durumu webhook işlendiğinde güncellenecek.
+        </p>
+      )}
+      {params.get("status") === "cancel" && (
+        <p className="rounded-md border border-yellow-800 p-3 text-sm text-yellow-400">
+          Ödeme işlemi iptal edildi.
+        </p>
+      )}
 
       {usage && (
         <Card className="space-y-4">

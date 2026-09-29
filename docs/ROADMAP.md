@@ -80,11 +80,11 @@ docker-compose up
 **Hedef:** Doküman yükleme → metin çıkarma → chunking → embedding → vector index.
 
 ### Görevler
-- [ ] MinIO entegrasyonu (local) + S3 adapter (prod)
+- [x] MinIO entegrasyonu (local) + S3 adapter (prod)
 - [x] Veri modeli: `Document`, `DocumentChunk` (metadata: page, bbox)
 - [x] Upload endpoint + magic-bytes doğrulama + boyut limiti
 - [x] Batch upload (toplu)
-- [ ] Malware scan (ClamAV / VirusTotal API) — Faz 7'ye ertelendi
+- [x] Malware scan (feature-flag'li ClamAV INSTREAM + Compose security profili)
 - [x] Liste/sil/favori API'ları
 - [x] Signed URL oluşturma (indirme için, 1 saat TTL)
 - [x] Celery worker kurulumu (eager mod + task)
@@ -127,7 +127,7 @@ docker-compose up
 - [x] AI sonuç önbellekleme (`doc_id + query hash → result`; memory/redis)
 - [x] Veri modeli: `AIJob` (type=chat, status, tokens_used, cost) + Conversation/ChatMessage
 - [x] Frontend: chat UI (mesaj listesi + input + citations)
-- [ ] Frontend: sayfa referansları tıklanınca PDF viewer'da o sayfa — Faz 6'ya ertelendi
+- [x] Frontend: sayfa referansları tıklanınca imzalı PDF viewer'da o sayfa
 - [x] Test: RAG doğruluğu (fixture doküman + soru → citations)
 
 ### Teslim Kriteri
@@ -261,6 +261,7 @@ docker-compose up
 - [x] Yedekleme stratejisi:
   - `infra/scripts/backup.sh` (pg_dump + S3 + retention)
   - `infra/scripts/restore.sh` (doğrulamalı geri yükleme)
+  - `infra/scripts/backup-storage.sh` / `restore-storage.sh` (MinIO/S3 nesneleri)
   - [ ] Backup restore testi — staging Postgres örneği gerektirir
 - [ ] Secrets vault (AWS Secrets Manager / Vault) — akış DEPLOYMENT.md'de, bağlanması bulut hesabı gerektirir
 - [x] Staging ortamı setup (`infra/docker-compose.staging.yml`)
@@ -278,7 +279,7 @@ docker-compose up
 - [x] Onboarding flow (ilk giriş kontrol listesi, feature-flag'li)
 - [x] Landing page (pazarlama sayfası)
 - [x] Erişilebilirlik (a11y): ARIA etiketleri, klavye odağı, focus-visible halkaları
-- [ ] Mimari diyagramları güncelle (deployment, sequence)
+- [x] Mimari diyagramları güncelle (deployment, upload ve RAG sequence)
 
 #### Test & Yük
 - [x] E2E test coverage: kritik kullanıcı yolları (Playwright)

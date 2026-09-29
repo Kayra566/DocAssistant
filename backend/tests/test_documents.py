@@ -1,7 +1,10 @@
 import io
+from unittest.mock import AsyncMock
 
 from docx import Document as DocxDocument
+from reportlab.pdfgen import canvas
 
+from app.core.exceptions import ValidationError
 from tests.conftest import auth_headers, setup_org
 
 
@@ -14,6 +17,14 @@ def _docx_bytes(text: str = "Docx içeriği burada.") -> bytes:
     doc.add_paragraph(text)
     buf = io.BytesIO()
     doc.save(buf)
+    return buf.getvalue()
+
+
+def _pdf_bytes(text: str = "PDF içeriği burada.") -> bytes:
+    buf = io.BytesIO()
+    pdf = canvas.Canvas(buf)
+    pdf.drawString(72, 720, text)
+    pdf.save()
     return buf.getvalue()
 
 
@@ -61,6 +72,26 @@ async def test_unsupported_extension_rejected(client):
     access, org_id = await setup_org(client, "doc-exe@example.com")
     resp = await _upload(client, access, org_id, "malware.exe", b"MZ\x90\x00")
     assert resp.status_code == 422
+
+
+async def test_malware_scan_rejects_upload_before_storage(client, monkeypatch):
+    access, org_id = await setup_org(client, "doc-malware@example.com")
+    scan = AsyncMock(
+        side_effect=ValidationError(
+            "Dosya zararlı yazılım içeriyor ve reddedildi: Eicar-Test-Signature"
+        )
+    )
+    monkeypatch.setattr("app.services.documents.scan_upload", scan)
+
+    resp = await _upload(client, access, org_id, "infected.txt", _txt())
+
+    assert resp.status_code == 422
+    assert "zararlı yazılım" in resp.json()["detail"]
+    scan.assert_awaited_once()
+    listed = await client.get(
+        f"/api/v1/documents/{org_id}", headers=auth_headers(access)
+    )
+    assert listed.json() == []
 
 
 async def test_empty_file_rejected(client):
@@ -119,6 +150,33 @@ async def test_signed_download_roundtrip(client):
 async def test_download_requires_valid_token(client):
     resp = await client.get("/api/v1/documents/download?token=bogus")
     assert resp.status_code == 401
+
+
+async def test_pdf_preview_roundtrip_and_non_pdf_rejection(client):
+    access, org_id = await setup_org(client, "doc-preview@example.com")
+    pdf_data = _pdf_bytes()
+    pdf_doc = (
+        await _upload(client, access, org_id, "önizleme.pdf", pdf_data, "application/pdf")
+    ).json()
+
+    url_resp = await client.get(
+        f"/api/v1/documents/{org_id}/{pdf_doc['id']}/preview-url",
+        headers=auth_headers(access),
+    )
+    assert url_resp.status_code == 200
+    preview = await client.get(url_resp.json()["url"])
+    assert preview.status_code == 200
+    assert preview.content == pdf_data
+    assert preview.headers["content-type"] == "application/pdf"
+    assert preview.headers["content-disposition"].startswith("inline;")
+    assert "%C3%B6nizleme.pdf" in preview.headers["content-disposition"]
+
+    txt_doc = (await _upload(client, access, org_id, "notes.txt", _txt())).json()
+    rejected = await client.get(
+        f"/api/v1/documents/{org_id}/{txt_doc['id']}/preview-url",
+        headers=auth_headers(access),
+    )
+    assert rejected.status_code == 422
 
 
 async def test_batch_upload_partial(client):

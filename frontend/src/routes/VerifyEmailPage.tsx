@@ -20,7 +20,11 @@ export default function VerifyEmailPage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-sm space-y-3 text-center">
         <h1 className="text-2xl font-bold">Email Doğrulama</h1>
-        {!token && <p className="text-sm text-red-400">Token bulunamadı.</p>}
+        {!token && (
+          <p className="text-sm text-green-400">
+            Kayıt başarılı. Doğrulama bağlantısı e-posta adresinize gönderildi.
+          </p>
+        )}
         {mutation.isPending && <p className="text-sm text-neutral-400">Doğrulanıyor…</p>}
         {mutation.isSuccess && (
           <p className="text-sm text-green-400">Email başarıyla doğrulandı ✓</p>

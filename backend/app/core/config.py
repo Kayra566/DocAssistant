@@ -56,6 +56,10 @@ class Settings(BaseSettings):
     # Yükleme sonrası işlemeyi Celery yerine inline (await) yap — local/test için pratik.
     PROCESS_DOCUMENTS_EAGER: bool = True
     ENABLE_OCR: bool = False
+    ENABLE_MALWARE_SCAN: bool = False
+    CLAMAV_HOST: str = "localhost"
+    CLAMAV_PORT: int = 3310
+    CLAMAV_TIMEOUT_SECONDS: float = 10.0
     # Embedding boyutu (hashing embedder için).
     EMBEDDING_DIM: int = 384
     EMBEDDING_PROVIDER: Literal["hashing", "sentence_transformers", "ollama"] = (

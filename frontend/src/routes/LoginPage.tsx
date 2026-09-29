@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card, Field } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { useAuthStore } from "@/stores/authStore";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const queryClient = useQueryClient();
   const setTokens = useAuthStore((s) => s.setTokens);
   const {
@@ -26,7 +27,8 @@ export default function LoginPage() {
     onSuccess: (tokens) => {
       queryClient.clear();
       setTokens(tokens.access_token, tokens.refresh_token);
-      navigate("/dashboard");
+      const next = params.get("next");
+      navigate(next?.startsWith("/") ? next : "/dashboard");
     },
   });
 
@@ -57,7 +59,10 @@ export default function LoginPage() {
           </Button>
         </form>
         <div className="flex justify-between text-sm text-neutral-400">
-          <Link to="/register" className="hover:text-indigo-400">
+          <Link
+            to={`/register${params.get("next") ? `?next=${encodeURIComponent(params.get("next")!)}` : ""}`}
+            className="hover:text-indigo-400"
+          >
             Hesap oluştur
           </Link>
           <Link to="/forgot-password" className="hover:text-indigo-400">

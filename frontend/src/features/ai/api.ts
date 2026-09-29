@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import type { ChatMessage, ChatResponse, Usage } from "@/types/api";
+import type { ChatMessage, ChatResponse, Conversation, Usage } from "@/types/api";
 
 export const aiApi = {
   async chat(
@@ -20,6 +20,13 @@ export const aiApi = {
   async messages(orgId: string, conversationId: string): Promise<ChatMessage[]> {
     const { data } = await apiClient.get<ChatMessage[]>(
       `/ai/${orgId}/conversations/${conversationId}/messages`,
+    );
+    return data;
+  },
+
+  async conversations(orgId: string, documentId: string): Promise<Conversation[]> {
+    const { data } = await apiClient.get<Conversation[]>(
+      `/ai/${orgId}/documents/${documentId}/conversations`,
     );
     return data;
   },

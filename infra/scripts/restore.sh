@@ -26,7 +26,8 @@ echo "==> ${PGDATABASE} veritabanına geri yükleniyor"
 pg_restore \
   --host="${PGHOST}" --port="${PGPORT}" --username="${PGUSER}" \
   --dbname="${PGDATABASE}" \
-  --clean --if-exists --no-owner --exit-on-error
+  --clean --if-exists --no-owner --exit-on-error \
+  "${archive}"
 
 echo "==> Doğrulama sorgusu"
 psql --host="${PGHOST}" --port="${PGPORT}" --username="${PGUSER}" \
