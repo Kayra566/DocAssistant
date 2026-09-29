@@ -34,6 +34,15 @@ services:
     volumes: []
     restart: unless-stopped
 
+  beat:
+    env_file:
+      - ../backend/.env.staging
+    environment:
+      ENVIRONMENT: staging
+      DEBUG: "false"
+    volumes: []
+    restart: unless-stopped
+
   frontend:
     restart: unless-stopped
 

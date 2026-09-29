@@ -28,6 +28,13 @@ export const exportApi = {
     return data;
   },
 
+  async get(orgId: string, exportId: string): Promise<ExportJob> {
+    const { data } = await apiClient.get<ExportJob>(
+      `/exports/${orgId}/${exportId}`,
+    );
+    return data;
+  },
+
   /** Dosyayı auth başlığıyla indirir ve tarayıcıda kaydetme akışını tetikler. */
   async download(orgId: string, exportJob: ExportJob): Promise<void> {
     const { data } = await apiClient.get<Blob>(

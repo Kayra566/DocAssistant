@@ -6,6 +6,12 @@ celery_app = Celery(
     "docassistant",
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
+    include=[
+        "app.workers.ai_tasks",
+        "app.workers.billing_tasks",
+        "app.workers.document_tasks",
+        "app.workers.export_tasks",
+    ],
 )
 
 celery_app.conf.update(
