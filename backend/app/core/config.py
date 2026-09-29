@@ -58,7 +58,11 @@ class Settings(BaseSettings):
     ENABLE_OCR: bool = False
     # Embedding boyutu (hashing embedder için).
     EMBEDDING_DIM: int = 384
-    EMBEDDING_PROVIDER: Literal["hashing", "sentence_transformers"] = "hashing"
+    EMBEDDING_PROVIDER: Literal["hashing", "sentence_transformers", "ollama"] = (
+        "hashing"
+    )
+    # ollama sağlayıcısı için embedding modeli (ör. nomic-embed-text, mxbai-embed-large).
+    OLLAMA_EMBED_MODEL: str = "nomic-embed-text"
 
     # Plan bazlı doküman kotası (Faz 5'te Stripe ile genişleyecek)
     QUOTA_FREE_DOCUMENTS: int = 10
@@ -94,6 +98,12 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = "llama3.1:8b"
     LLM_TIMEOUT_SECONDS: int = 60
     RAG_TOP_K: int = 5
+
+    # Model dosyalarının bırakılacağı klasör (backend'in gördüğü yol).
+    MODELS_DIR: str = "./models"
+    # Aynı klasörün Ollama konteyneri içindeki yolu — içe aktarma bunu kullanır.
+    MODELS_MOUNT_PATH: str = "/models"
+    MODEL_IMPORT_TIMEOUT_SECONDS: int = 600
 
     # AI kotası (aylık token bütçesi, plan bazlı)
     QUOTA_FREE_AI_TOKENS: int = 100_000

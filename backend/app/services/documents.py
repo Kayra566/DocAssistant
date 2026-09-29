@@ -26,7 +26,7 @@ async def process_document(db: AsyncSession, document: Document) -> None:
         chunks = chunk_pages(pages)
 
         embedder = get_embedder()
-        embeddings = embedder.embed_many([c[2] for c in chunks])
+        embeddings = await embedder.embed_many([c[2] for c in chunks])
 
         for (idx, page, content), emb in zip(chunks, embeddings, strict=False):
             db.add(

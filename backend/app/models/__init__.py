@@ -25,6 +25,7 @@ from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.enums import ROLE_LEVEL, Plan, Role
 from app.models.notification import Notification, NotificationType
 from app.models.organization import Invitation, Membership, Organization
+from app.models.setting import ACTIVE_LLM, AppSetting
 from app.models.user import (
     EmailVerificationToken,
     PasswordResetToken,
@@ -65,4 +66,6 @@ __all__ = [
     "ExportStatus",
     "Notification",
     "NotificationType",
+    "AppSetting",
+    "ACTIVE_LLM",
 ]

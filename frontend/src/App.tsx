@@ -14,6 +14,7 @@ import ForgotPasswordPage from "@/routes/ForgotPasswordPage";
 import LandingPage from "@/routes/LandingPage";
 import { PrivacyPage, TermsPage } from "@/routes/LegalPages";
 import LoginPage from "@/routes/LoginPage";
+import ModelsPage from "@/routes/ModelsPage";
 import RegisterPage from "@/routes/RegisterPage";
 import ResetPasswordPage from "@/routes/ResetPasswordPage";
 import SharedDocumentPage from "@/routes/SharedDocumentPage";
@@ -56,6 +57,7 @@ export default function App() {
             path="/organizations/:orgId/analytics"
             element={<AnalyticsPage />}
           />
+          <Route path="/organizations/:orgId/models" element={<ModelsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

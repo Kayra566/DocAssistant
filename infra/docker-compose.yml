@@ -61,6 +61,12 @@ services:
         condition: service_started
     volumes:
       - ../backend/app:/app/app
+      # Model dosyalarını buraya bırakın; Ollama aynı klasörü /models olarak görür.
+      - ../models:/models
+    environment:
+      MODELS_DIR: /models
+      MODELS_MOUNT_PATH: /models
+      OLLAMA_BASE_URL: http://ollama:11434
     command: >
       sh -c "alembic upgrade head &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
@@ -81,6 +87,18 @@ services:
       disable: true
     command: celery -A app.workers.celery_app worker --loglevel=info
 
+  # Yerel LLM. Varsayılan olarak başlamaz (birkaç GB model indirir):
+  #   docker compose --profile ai up -d
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ai"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+      - ../models:/models
+    restart: unless-stopped
+
   frontend:
     build:
       context: ../frontend
@@ -93,3 +111,4 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  ollama_models:

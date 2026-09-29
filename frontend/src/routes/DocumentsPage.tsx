@@ -7,6 +7,7 @@ import { ShareDialog } from "@/components/shared/ShareDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { documentApi, formatBytes } from "@/features/documents/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import type { Document, DocumentStatus } from "@/types/api";
 
 const statusColor: Record<DocumentStatus, string> = {
@@ -52,6 +53,13 @@ export default function DocumentsPage() {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
+  const uploadError = uploadMutation.error
+    ? getApiErrorMessage(uploadMutation.error, "Dosya yüklenemedi.")
+    : null;
+  const deleteError = deleteMutation.error
+    ? getApiErrorMessage(deleteMutation.error, "Doküman silinemedi.")
+    : null;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-8">
       <Link to="/dashboard" className="text-sm text-indigo-400 hover:underline">
@@ -79,10 +87,20 @@ export default function DocumentsPage() {
         {uploadMutation.isPending && (
           <p className="mt-2 text-sm text-yellow-400">Yükleniyor…</p>
         )}
+        {uploadError && (
+          <p role="alert" className="mt-2 text-sm text-red-400">
+            {uploadError}
+          </p>
+        )}
       </Card>
 
       <Card className="space-y-2">
         <h2 className="text-lg font-semibold">Yüklenen Dokümanlar</h2>
+        {deleteError && (
+          <p role="alert" className="text-sm text-red-400">
+            {deleteError}
+          </p>
+        )}
         {docsQuery.isLoading && (
           <p className="text-sm text-neutral-400">Yükleniyor…</p>
         )}
@@ -102,6 +120,9 @@ export default function DocumentsPage() {
                   {doc.chunk_count} chunk ·{" "}
                   <span className={statusColor[doc.status]}>{doc.status}</span>
                 </p>
+                {doc.status === "failed" && doc.error && (
+                  <p className="mt-0.5 text-xs text-red-400">{doc.error}</p>
+                )}
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <button

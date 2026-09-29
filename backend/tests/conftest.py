@@ -38,15 +38,19 @@ def _isolated_storage(tmp_path):
 
 @pytest.fixture(autouse=True)
 def _reset_ai_singletons():
-    """AI cache/provider singleton'larını testler arası sıfırla."""
+    """AI cache/provider/embedder singleton'larını testler arası sıfırla."""
     import app.ai.cache as cache_module
     import app.ai.provider as provider_module
+    from app.ai.embeddings import reset_embedder
 
-    cache_module._cache = None
-    provider_module._provider = None
+    def _reset() -> None:
+        cache_module._cache = None
+        provider_module.reset_provider()
+        reset_embedder()
+
+    _reset()
     yield
-    cache_module._cache = None
-    provider_module._provider = None
+    _reset()
 
 
 @pytest.fixture(autouse=True)

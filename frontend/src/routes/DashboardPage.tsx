@@ -134,6 +134,12 @@ export default function DashboardPage() {
                 >
                   {t("nav.billing")} →
                 </Link>
+                <Link
+                  to={`/organizations/${org.id}/models`}
+                  className="text-sm text-indigo-400 hover:underline"
+                >
+                  AI Modeli →
+                </Link>
               </div>
             </li>
           ))}

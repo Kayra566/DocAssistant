@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ai import rag
 from app.ai.cache import cache_key, get_cache
 from app.ai.guards import moderate_output, sanitize_question
-from app.ai.provider import SYSTEM_PROMPT, get_provider
+from app.ai.provider import SYSTEM_PROMPT, get_active_provider
 from app.ai.tokens import estimate_tokens
 from app.core.config import settings
 from app.core.exceptions import NotFoundError
@@ -109,7 +109,7 @@ async def chat(
         citations = cached["citations"]
         cache_hit = True
     else:
-        answer = moderate_output(await rag.generate_answer(prompt))
+        answer = moderate_output(await rag.generate_answer(db, prompt))
         cache.set(
             key, {"answer": answer, "citations": citations}, settings.AI_CACHE_TTL_SECONDS
         )
@@ -178,7 +178,8 @@ async def stream_chat(
         db, tenant_id=org_id, document_id=doc.id, question=question
     )
     prompt = rag.build_prompt([c for c, _ in scored], question)
-    async for token in get_provider().stream(system=SYSTEM_PROMPT, prompt=prompt):
+    provider = await get_active_provider(db)
+    async for token in provider.stream(system=SYSTEM_PROMPT, prompt=prompt):
         yield token
 
 

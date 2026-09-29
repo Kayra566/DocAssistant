@@ -19,7 +19,7 @@ from app.ai.prompts import (
     summary_instruction,
     translate_instruction,
 )
-from app.ai.provider import SYSTEM_PROMPT, get_provider
+from app.ai.provider import SYSTEM_PROMPT, get_active_provider
 from app.ai.tokens import estimate_tokens
 from app.core.config import settings
 from app.core.exceptions import NotFoundError, ValidationError
@@ -164,8 +164,9 @@ async def run_job(db: AsyncSession, job: AIJob) -> AIJob:
             job.cache_hit = True
             job.tokens_used = 0
         else:
+            provider = await get_active_provider(db)
             raw = moderate_output(
-                await get_provider().complete(system=SYSTEM_PROMPT, prompt=prompt)
+                await provider.complete(system=SYSTEM_PROMPT, prompt=prompt)
             )
             job.result = _shape_result(job.type, raw)
             job.cache_hit = False
