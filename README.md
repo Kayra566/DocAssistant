@@ -47,6 +47,7 @@ Detaylar: [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
 
 - [Proje Planı](docs/PROJECT_PLAN.md)
 - [Yol Haritası](docs/ROADMAP.md)
+- [Mimari ve Akış Diyagramları](docs/ARCHITECTURE.md)
 - [Klasör Yapısı](docs/PROJECT_STRUCTURE.md)
 
 ## Lisans

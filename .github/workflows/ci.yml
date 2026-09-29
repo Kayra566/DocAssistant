@@ -114,11 +114,14 @@ jobs:
         working-directory: backend
         run: |
           alembic upgrade head
-          test \"$(alembic heads | wc -l)\" -eq 1
+          test "$(alembic heads | wc -l)" -eq 1
           nohup uvicorn app.main:app --port 8000 > api.log 2>&1 &
       - name: Install frontend
         working-directory: frontend
         run: npm ci
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
       - name: Install Playwright browser
         working-directory: frontend
         run: npx playwright install --with-deps chromium

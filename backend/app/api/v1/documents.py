@@ -1,4 +1,5 @@
 import uuid
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import Response
@@ -8,7 +9,7 @@ from app.api.deps import require_role
 from app.core import security
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.exceptions import AppError, AuthError, NotFoundError
+from app.core.exceptions import AppError, AuthError, NotFoundError, ValidationError
 from app.core.storage import get_storage
 from app.models.enums import Role
 from app.models.user import User
@@ -47,7 +48,36 @@ async def download_file(token: str, db: AsyncSession = Depends(get_db)):
     return Response(
         content=data,
         media_type=doc.mime_type,
-        headers={"Content-Disposition": f'attachment; filename="{doc.filename}"'},
+        headers={
+            "Content-Disposition": (
+                f"attachment; filename*=UTF-8''{quote(doc.filename)}"
+            )
+        },
+    )
+
+
+@router.get("/preview")
+async def preview_file(token: str, db: AsyncSession = Depends(get_db)):
+    """İmzalı token ile PDF'i tarayıcı içinde gösterir."""
+    try:
+        doc_id = security.verify_download_token(token)
+    except Exception as exc:
+        raise AuthError("Önizleme bağlantısı geçersiz veya süresi dolmuş.") from exc
+
+    from app.models.document import Document
+
+    doc = await db.get(Document, uuid.UUID(doc_id))
+    if not doc:
+        raise NotFoundError("Doküman bulunamadı.")
+    if doc.file_type != "pdf":
+        raise ValidationError("Tarayıcı önizlemesi yalnızca PDF dosyaları için desteklenir.")
+    data = get_storage().get(doc.storage_key)
+    return Response(
+        content=data,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{quote(doc.filename)}"
+        },
     )
 
 
@@ -135,6 +165,23 @@ async def get_download_url(
     token = security.create_download_token(str(doc.id))
     return DocumentDownloadResponse(
         url=f"{settings.API_V1_PREFIX}/documents/download?token={token}",
+        expires_in_minutes=settings.SIGNED_URL_EXPIRE_MINUTES,
+    )
+
+
+@router.get("/{org_id}/{doc_id}/preview-url", response_model=DocumentDownloadResponse)
+async def get_preview_url(
+    org_id: uuid.UUID,
+    doc_id: uuid.UUID,
+    user: User = Depends(require_viewer),
+    db: AsyncSession = Depends(get_db),
+):
+    doc = await doc_service.get_document(db, org_id, doc_id)
+    if doc.file_type != "pdf":
+        raise ValidationError("Tarayıcı önizlemesi yalnızca PDF dosyaları için desteklenir.")
+    token = security.create_download_token(str(doc.id))
+    return DocumentDownloadResponse(
+        url=f"{settings.API_V1_PREFIX}/documents/preview?token={token}",
         expires_in_minutes=settings.SIGNED_URL_EXPIRE_MINUTES,
     )
 
