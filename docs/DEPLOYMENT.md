@@ -106,12 +106,17 @@ kullanmalıdır.
 ```bash
 # Günlük (cron 03:00 UTC)
 PGPASSWORD=... BACKUP_S3_BUCKET=s3://docassistant-backups infra/scripts/backup.sh
+MC_ALIAS=docassistant MC_BUCKET=documents infra/scripts/backup-storage.sh
 
 # Restore testi (staging'de, ayda bir)
 PGDATABASE=docassistant_restore infra/scripts/restore.sh backups/<dosya>.dump
+MC_ALIAS=docassistant MC_BUCKET=documents \
+  infra/scripts/restore-storage.sh backups/object-storage-<tarih>
 ```
 
-Object storage tarafında bucket versioning ve lifecycle politikası açık olmalıdır.
+Veritabanı ve object storage yedekleri aynı bakım penceresinde alınmalı ve birlikte
+restore edilmelidir. Object storage tarafında bucket versioning ve lifecycle politikası
+açık olmalıdır.
 
 ## 10. E-posta domain doğrulama
 

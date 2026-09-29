@@ -43,10 +43,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev]" pip-audit
       # -ll: yalnızca orta/yüksek şiddetteki bulgularda pipeline durur.
       - name: Static security scan (bandit)
         run: bandit -c bandit.yaml -r app -ll
+      - name: Dependency audit
+        run: pip-audit
 
   frontend:
     runs-on: ubuntu-latest
@@ -84,7 +86,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Dependency audit
-        run: npm audit --audit-level=critical
+        run: npm audit --audit-level=high
 
   e2e:
     runs-on: ubuntu-latest
@@ -108,10 +110,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
-      - name: Create schema and start API
+      - name: Run migrations and start API
         working-directory: backend
         run: |
-          python scripts/init_db.py
+          alembic upgrade head
+          test \"$(alembic heads | wc -l)\" -eq 1
           nohup uvicorn app.main:app --port 8000 > api.log 2>&1 &
       - name: Install frontend
         working-directory: frontend
