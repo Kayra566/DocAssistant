@@ -42,6 +42,28 @@ async def test_export_requires_authentication(client):
     assert (await client.get("/api/v1/gdpr/export")).status_code == 401
 
 
+async def test_export_excludes_documents_owned_by_other_org_members(client):
+    owner_access, org_id, _ = await _setup(client, "gdpr-shared-owner@example.com")
+    member_access, _ = await setup_org(client, "gdpr-shared-member@example.com")
+    invite = await client.post(
+        f"/api/v1/organizations/{org_id}/invitations",
+        headers=auth_headers(owner_access),
+        json={"email": "gdpr-shared-member@example.com", "role": "member"},
+    )
+    await client.post(
+        "/api/v1/organizations/invitations/accept",
+        headers=auth_headers(member_access),
+        json={"token": invite.json()["dev_invite_token"]},
+    )
+
+    exported = await client.get(
+        "/api/v1/gdpr/export", headers=auth_headers(member_access)
+    )
+    payload = json.loads(exported.content)
+    assert payload["documents"] == []
+    assert "subscriptions" not in payload
+
+
 async def test_delete_account_requires_password_and_confirmation(client):
     access, _, _ = await _setup(client, "gdpr-guard@example.com")
 

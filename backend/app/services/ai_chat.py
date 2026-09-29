@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ai import rag
 from app.ai.cache import cache_key, get_cache
 from app.ai.guards import moderate_output, sanitize_question
-from app.ai.provider import SYSTEM_PROMPT, get_active_provider
+from app.ai.provider import SYSTEM_PROMPT, active_model_context, get_active_provider
 from app.ai.tokens import estimate_tokens
 from app.core.config import settings
 from app.core.exceptions import NotFoundError
@@ -53,6 +53,8 @@ async def _get_or_create_conversation(
                 select(Conversation).where(
                     Conversation.id == conversation_id,
                     Conversation.organization_id == org_id,
+                    Conversation.document_id == document_id,
+                    Conversation.user_id == user_id,
                 )
             )
         ).scalar_one_or_none()
@@ -102,14 +104,17 @@ async def chat(
     citations = rag.to_citations(scored)
 
     cache = get_cache()
-    key = cache_key("chat", str(doc.id), question)
+    model_id, model_version = await active_model_context(db, org_id)
+    key = cache_key(
+        "chat", str(org_id), str(doc.id), model_id, str(model_version), question
+    )
     cached = cache.get(key)
     if cached is not None:
         answer = cached["answer"]
         citations = cached["citations"]
         cache_hit = True
     else:
-        answer = moderate_output(await rag.generate_answer(db, prompt))
+        answer = moderate_output(await rag.generate_answer(db, org_id, prompt))
         cache.set(
             key, {"answer": answer, "citations": citations}, settings.AI_CACHE_TTL_SECONDS
         )
@@ -178,13 +183,16 @@ async def stream_chat(
         db, tenant_id=org_id, document_id=doc.id, question=question
     )
     prompt = rag.build_prompt([c for c, _ in scored], question)
-    provider = await get_active_provider(db)
+    provider = await get_active_provider(db, org_id)
     async for token in provider.stream(system=SYSTEM_PROMPT, prompt=prompt):
         yield token
 
 
 async def list_conversations(
-    db: AsyncSession, org_id: uuid.UUID, document_id: uuid.UUID
+    db: AsyncSession,
+    org_id: uuid.UUID,
+    document_id: uuid.UUID,
+    user_id: uuid.UUID,
 ) -> list[Conversation]:
     rows = (
         await db.execute(
@@ -192,6 +200,7 @@ async def list_conversations(
             .where(
                 Conversation.organization_id == org_id,
                 Conversation.document_id == document_id,
+                Conversation.user_id == user_id,
             )
             .order_by(Conversation.created_at.desc())
         )
@@ -200,13 +209,17 @@ async def list_conversations(
 
 
 async def get_messages(
-    db: AsyncSession, org_id: uuid.UUID, conversation_id: uuid.UUID
+    db: AsyncSession,
+    org_id: uuid.UUID,
+    conversation_id: uuid.UUID,
+    user_id: uuid.UUID,
 ) -> list[ChatMessage]:
     conv = (
         await db.execute(
             select(Conversation).where(
                 Conversation.id == conversation_id,
                 Conversation.organization_id == org_id,
+                Conversation.user_id == user_id,
             )
         )
     ).scalar_one_or_none()

@@ -79,17 +79,23 @@ async def test_download_permission_returns_file(client):
     assert DOC_TEXT.encode("utf-8") in resp.content
 
 
-async def test_email_specific_share_requires_matching_email(client):
+async def test_email_specific_share_requires_signed_recipient_proof(client):
     access, org_id, doc = await _setup(client, "share-e@example.com")
-    token = (
+    created = (
         await _create_share(
             client, access, org_id, doc["id"], email="guest@example.com"
         )
-    ).json()["token"]
+    ).json()
+    token = created["token"]
 
     assert (await client.get(f"/api/v1/shares/public/{token}")).status_code == 401
+    forged = await client.get(
+        f"/api/v1/shares/public/{token}", params={"email": "guest@example.com"}
+    )
+    assert forged.status_code == 401
+    proof = created["url"].split("proof=", 1)[1]
     ok = await client.get(
-        f"/api/v1/shares/public/{token}", params={"email": "GUEST@example.com"}
+        f"/api/v1/shares/public/{token}", params={"proof": proof}
     )
     assert ok.status_code == 200
 

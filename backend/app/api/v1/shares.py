@@ -29,11 +29,11 @@ require_member = require_role(Role.MEMBER)
 @router.get("/public/{token}", response_model=SharedDocumentResponse)
 async def public_share(
     token: str,
-    email: str | None = Query(default=None),
+    proof: str | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ):
     """Paylaşım bağlantısının hedeflediği dokümanın herkese açık özeti."""
-    link, doc = await sharing.resolve_share(db, token, email)
+    link, doc = await sharing.resolve_share(db, token, proof)
     await sharing.register_access(db, link)
     org = await db.get(Organization, link.organization_id)
     return SharedDocumentResponse(
@@ -51,10 +51,10 @@ async def public_share(
 @router.get("/public/{token}/download")
 async def public_share_download(
     token: str,
-    email: str | None = Query(default=None),
+    proof: str | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ):
-    link, doc = await sharing.resolve_share(db, token, email)
+    link, doc = await sharing.resolve_share(db, token, proof)
     if not sharing.can_download(link):
         raise PermissionError("Bu bağlantı yalnızca görüntüleme izni veriyor.")
     await sharing.register_access(db, link)
@@ -84,7 +84,7 @@ async def create_share(
     return ShareLinkCreated(
         **ShareLinkResponse.model_validate(link).model_dump(),
         token=raw_token,
-        url=sharing.share_url(raw_token),
+        url=sharing.share_url(raw_token, link.email),
     )
 
 

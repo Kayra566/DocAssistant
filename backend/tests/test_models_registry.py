@@ -21,8 +21,12 @@ async def test_lists_builtin_when_ollama_unreachable(client, monkeypatch, tmp_pa
     monkeypatch.setattr(settings, "MODELS_DIR", str(tmp_path))
     monkeypatch.setattr(settings, "OLLAMA_BASE_URL", "http://127.0.0.1:9")
 
-    access, _ = await setup_org(client, "models-a@example.com")
-    resp = await client.get("/api/v1/models", headers=auth_headers(access))
+    access, org_id = await setup_org(client, "models-a@example.com")
+    resp = await client.get(
+        "/api/v1/models",
+        params={"org_id": org_id},
+        headers=auth_headers(access),
+    )
 
     assert resp.status_code == 200, resp.text
     body = resp.json()
@@ -36,9 +40,13 @@ async def test_dropped_gguf_file_is_discovered(client, monkeypatch, tmp_path):
     monkeypatch.setattr(settings, "OLLAMA_BASE_URL", "http://127.0.0.1:9")
     _write_gguf(tmp_path, "qwen2.5-7b.gguf", 128)
 
-    access, _ = await setup_org(client, "models-b@example.com")
+    access, org_id = await setup_org(client, "models-b@example.com")
     body = (
-        await client.get("/api/v1/models", headers=auth_headers(access))
+        await client.get(
+            "/api/v1/models",
+            params={"org_id": org_id},
+            headers=auth_headers(access),
+        )
     ).json()
 
     dropped = [m for m in body["models"] if m["source"] == "file"]
@@ -76,8 +84,34 @@ async def test_active_model_persists_and_applies(client, monkeypatch, tmp_path):
     assert resp.status_code == 200, resp.text
     assert resp.json() == {"model_id": "builtin:fake", "configured": True}
 
-    again = await client.get("/api/v1/models/active", headers=auth_headers(access))
+    again = await client.get(
+        f"/api/v1/models/{org_id}/active", headers=auth_headers(access)
+    )
     assert again.json()["model_id"] == "builtin:fake"
+
+
+async def test_active_model_configuration_is_scoped_to_organization(
+    client, monkeypatch, tmp_path
+):
+    monkeypatch.setattr(settings, "MODELS_DIR", str(tmp_path))
+    monkeypatch.setattr(settings, "OLLAMA_BASE_URL", "http://127.0.0.1:9")
+    first_access, first_org = await setup_org(client, "models-scope-a@example.com")
+    second_access, second_org = await setup_org(client, "models-scope-b@example.com")
+
+    await client.put(
+        f"/api/v1/models/{first_org}/active",
+        headers=auth_headers(first_access),
+        json={"model_id": "builtin:fake"},
+    )
+
+    first = await client.get(
+        f"/api/v1/models/{first_org}/active", headers=auth_headers(first_access)
+    )
+    second = await client.get(
+        f"/api/v1/models/{second_org}/active", headers=auth_headers(second_access)
+    )
+    assert first.json()["configured"] is True
+    assert second.json()["configured"] is False
 
 
 async def test_switching_model_requires_owner(client, monkeypatch, tmp_path):

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
 import uuid
 from datetime import timedelta
 
@@ -16,8 +18,18 @@ from app.services import activity
 from app.services.documents import get_document
 
 
-def share_url(raw_token: str) -> str:
-    return f"{settings.SHARE_PUBLIC_BASE_URL.rstrip('/')}/{raw_token}"
+def _recipient_proof(raw_token: str, email: str) -> str:
+    message = f"{security.hash_token(raw_token)}:{email.strip().lower()}".encode()
+    return hmac.new(
+        settings.JWT_SECRET.encode(), message, hashlib.sha256
+    ).hexdigest()
+
+
+def share_url(raw_token: str, email: str | None = None) -> str:
+    url = f"{settings.SHARE_PUBLIC_BASE_URL.rstrip('/')}/{raw_token}"
+    if email:
+        return f"{url}?proof={_recipient_proof(raw_token, email)}"
+    return url
 
 
 async def create_share_link(
@@ -107,7 +119,7 @@ async def revoke_share_link(
 
 
 async def resolve_share(
-    db: AsyncSession, raw_token: str, email: str | None = None
+    db: AsyncSession, raw_token: str, recipient_proof: str | None = None
 ) -> tuple[ShareLink, Document]:
     """Public token'ı doğrular. Geçersiz/süresi dolmuş/iptal edilmiş ise 401 üretir."""
     link = (
@@ -125,7 +137,12 @@ async def resolve_share(
     if expires_at and expires_at < utcnow():
         raise AuthError("Paylaşım bağlantısı geçersiz veya süresi dolmuş.")
 
-    if link.email and (email or "").strip().lower() != link.email:
+    expected_proof = (
+        _recipient_proof(raw_token, link.email) if link.email else None
+    )
+    if expected_proof and not hmac.compare_digest(
+        recipient_proof or "", expected_proof
+    ):
         raise AuthError("Bu bağlantı yalnızca davet edilen e-posta ile açılabilir.")
 
     doc = await db.get(Document, link.document_id)

@@ -1,11 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
-import { Button } from "@/components/ui/button";
-import { Card, Field } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { formatBytes } from "@/features/documents/api";
 import { shareApi } from "@/features/sharing/api";
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -13,14 +10,11 @@ import { getApiErrorMessage } from "@/lib/api-error";
 export default function SharedDocumentPage() {
   const { token = "" } = useParams();
   const [searchParams] = useSearchParams();
-  const [email, setEmail] = useState(searchParams.get("email") ?? "");
-  const [submittedEmail, setSubmittedEmail] = useState(
-    searchParams.get("email") ?? "",
-  );
+  const proof = searchParams.get("proof") ?? "";
 
   const shareQuery = useQuery({
-    queryKey: ["public-share", token, submittedEmail],
-    queryFn: () => shareApi.publicInfo(token, submittedEmail || undefined),
+    queryKey: ["public-share", token, proof],
+    queryFn: () => shareApi.publicInfo(token, proof || undefined),
     retry: false,
   });
 
@@ -43,22 +37,8 @@ export default function SharedDocumentPage() {
       )}
 
       {status === 401 && (
-        <Card className="space-y-3">
+        <Card>
           <p className="text-sm text-red-400">{errorMsg}</p>
-          <Field label="Davet edilen e-posta">
-            <Input
-              type="email"
-              value={email}
-              placeholder="ornek@firma.com"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </Field>
-          <Button
-            disabled={!email.trim()}
-            onClick={() => setSubmittedEmail(email.trim())}
-          >
-            Erişimi doğrula
-          </Button>
         </Card>
       )}
 
@@ -86,7 +66,7 @@ export default function SharedDocumentPage() {
 
           {doc.can_download ? (
             <a
-              href={shareApi.publicDownloadUrl(token, submittedEmail || undefined)}
+              href={shareApi.publicDownloadUrl(token, proof || undefined)}
               className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
             >
               Dokümanı indir

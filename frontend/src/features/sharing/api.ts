@@ -43,17 +43,17 @@ export const shareApi = {
     return data;
   },
 
-  async publicInfo(token: string, email?: string): Promise<SharedDocument> {
+  async publicInfo(token: string, proof?: string): Promise<SharedDocument> {
     const { data } = await publicClient.get<SharedDocument>(
       `/shares/public/${token}`,
-      { params: email ? { email } : undefined },
+      { params: proof ? { proof } : undefined },
     );
     return data;
   },
 
-  publicDownloadUrl(token: string, email?: string): string {
+  publicDownloadUrl(token: string, proof?: string): string {
     const base = `${apiClient.defaults.baseURL}/shares/public/${token}/download`;
-    return email ? `${base}?email=${encodeURIComponent(email)}` : base;
+    return proof ? `${base}?proof=${encodeURIComponent(proof)}` : base;
   },
 };
 
